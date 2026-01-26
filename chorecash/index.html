@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ChoreCash">
     
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojODU1YWZmO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM2MzY2ZjE7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0idXJsKCNncmFkKSIgLz4KICA8dGV4dCB4PSI1MCUiIHk9IjU1JSIgZm9udC1mYW1pbHk9J1BvcHBpbnMsIHNhbnMtc2VyaWYnIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5DaG9yZUNhc2g8L3RleHQ+Cjwvc3ZnPg==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22180%22%20height%3D%22180%22%20viewBox%3D%220%200%20180%20180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20style%3D%22stop-color%3A%239b5cf6%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20style%3D%22stop-color%3A%230b84ff%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22180%22%20height%3D%22180%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M90%2035%20L70%2060%20L85%2060%20L85%2080%20L95%2080%20L95%2060%20L110%2060%20Z%22%20fill%3D%22white%22%20%2F%3E%3Crect%20x%3D%2280%22%20y%3D%22ODUi%20d2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0id2hpdGUiIC8+PHJlY3QgeD0iOTIiIHk9Ijg1IiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSJ3aGl0ZSIgLz48cmVjdCB4PSI4MCIgeT0iOTUiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IndoaXRlIiAvPjxyZWN0IHg9IjkyIiB5PSI5NSIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0id2hpdGUiIC8+PHRleHQgeD0iOTAiIHk9IjEzMCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkNob3JlQ2FzaDwvdGV4dD48dGV4dCB4PSI5MCIgeT0iMTUwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCIgbGV0dGVyLXNwYWNpbmc9IjMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVMSVRFPC90ZXh0Pjwvc3ZnPg==">
     
     <title>ChoreCash Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
             padding-top: env(safe-area-inset-top);
         }
 
-        /* --- AUTH CONTAINER --- */
+        /* --- RESTORED AUTH CONTAINER --- */
         .auth-container { 
             width: 100%; 
             max-width: 1000px; 
@@ -204,10 +204,7 @@
     window.handleLogin = async () => {
         const e = document.getElementById('loginEmail').value;
         const p = document.getElementById('loginPass').value;
-        try { 
-            await signOut(auth); 
-            await signInWithEmailAndPassword(auth, e, p);
-        } catch(err) { alert(err.message); }
+        try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { alert(err.message); }
     };
 
     window.handleSignup = async () => {
@@ -215,9 +212,8 @@
         const p = document.getElementById('regPass').value;
         const r = document.getElementById('regRole').value;
         try { 
-            await signOut(auth);
             const cred = await createUserWithEmailAndPassword(auth, e, p);
-            await setDoc(doc(db, "users", cred.user.uid), { email: e, role: r });
+            await setDoc(doc(db, "users", cred.user.uid), { role: r });
         } catch(err) { alert(err.message); }
     };
 
@@ -264,34 +260,14 @@
             list.innerHTML = snap.empty ? '<p style="color:#94a3b8; text-align:center;">No active tasks.</p>' : '';
             snap.forEach(d => {
                 const c = d.data();
-                const id = d.id;
-                let actionBtn = '';
-                
-                if (currentRole === 'kid') {
-                    if (!c.startTime) {
-                        actionBtn = `<button class="btn-action btn-start" onclick="startChore('${id}')">Start</button>`;
-                    } else {
-                        actionBtn = `<button id="btn-${id}" class="btn-action btn-finish" onclick="finishChore('${id}', '${c.name}', ${c.price})">Finish</button>`;
-                    }
-                }
-
                 list.innerHTML += `
                     <div class="chore-item">
                         <div><b>${c.name}</b></div>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="color:#6366f1; font-weight:800;">$${c.price.toFixed(2)}</span>
-                            ${actionBtn}
+                            <button class="btn-action btn-finish" onclick="finishChore('${d.id}', '${c.name}', ${c.price})" style="background:#10b981; color:white;">DONE</button>
                         </div>
                     </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(5)), (snap) => {
-            const hList = document.getElementById('historyList');
-            hList.innerHTML = '';
-            snap.forEach(d => {
-                const h = d.data();
-                hList.innerHTML += `<div class="chore-item" style="opacity:0.6; font-size:0.85rem;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
             });
         });
     }
@@ -300,14 +276,10 @@
         const n = document.getElementById('taskName').value;
         const p = parseFloat(document.getElementById('taskPrice').value);
         if(n && p) {
-            await addDoc(collection(db, "chores"), { name: n, price: p, startTime: null });
+            await addDoc(collection(db, "chores"), { name: n, price: p });
             document.getElementById('taskName').value = '';
             document.getElementById('taskPrice').value = '';
         }
-    };
-
-    window.startChore = async (id) => {
-        await updateDoc(doc(db, "chores", id), { startTime: serverTimestamp() });
     };
 
     window.finishChore = async (id, name, price) => {
@@ -315,17 +287,11 @@
         isProcessing = true;
         try {
             await runTransaction(db, async (transaction) => {
-                const choreRef = doc(db, "chores", id);
-                const choreSnap = await transaction.get(choreRef);
-                if (!choreSnap.exists()) return;
-
                 const balanceRef = doc(db, "appData", "sharedBalance");
                 const balanceSnap = await transaction.get(balanceRef);
                 const currentBalance = balanceSnap.exists() ? balanceSnap.data().amount : 0;
-
                 transaction.update(balanceRef, { amount: currentBalance + price });
-                transaction.delete(choreRef);
-                transaction.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
+                transaction.delete(doc(db, "chores", id));
             });
         } catch (e) { console.error(e); } finally { isProcessing = false; }
     };
