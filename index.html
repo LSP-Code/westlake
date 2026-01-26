@@ -183,6 +183,8 @@
             padding: 2rem;
             font-size: 0.875rem;
             color: var(--text-muted);
+            text-align: center;
+            width: 100%;
         }
 
         @media (max-width: 640px) {
@@ -195,41 +197,41 @@
 
     <header>
         <h1>Westlake Family</h1>
-        <p>Central Application Dashboard</p>
+        <p>Your central app dashboard</p>
     </header>
 
     <main class="main-container">
         
         <div class="section-title">Active Apps</div>
         <div class="grid">
-            <a href="#" class="app-card" id="choreCashLink">
-                <div class="badge">Active</div>
+            <a href="https://lsp-code.github.io/westlake/chorecash/" class="app-card">
+                <div class="badge">Live</div>
                 <div class="icon-box">
                     <span>💰</span>
                 </div>
                 <div class="app-name">ChoreCash</div>
                 <div class="app-desc">
-                    The official Westlake system for tracking chores, managing allowances, and teaching financial responsibility.
+                    Manage chore assignments, track earnings, and handle payouts for the whole family.
                 </div>
                 <div class="btn-launch">
-                    Launch App <span>→</span>
+                    Open App <span>→</span>
                 </div>
             </a>
         </div>
 
-        <div class="section-title">Planned & Future Apps</div>
+        <div class="section-title">Coming Soon</div>
         <div class="grid">
             <div class="app-card placeholder-card">
                 <div>
-                    <div class="app-name" style="color: #cbd5e1;">Next Project</div>
-                    <p class="coming-soon-text">Coming Soon</p>
+                    <div class="app-name" style="color: #cbd5e1;">Family Calendar</div>
+                    <p class="coming-soon-text">Future Project</p>
                 </div>
             </div>
             
             <div class="app-card placeholder-card">
                 <div>
-                    <div class="app-name" style="color: #cbd5e1;">Family Calendar</div>
-                    <p class="coming-soon-text">In Development</p>
+                    <div class="app-name" style="color: #cbd5e1;">Meal Planner</div>
+                    <p class="coming-soon-text">Future Project</p>
                 </div>
             </div>
         </div>
@@ -237,22 +239,8 @@
     </main>
 
     <footer>
-        &copy; 2026 Westlake Family Management System
+        &copy; 2026 Westlake Family Portal
     </footer>
 
-    <script>
-        document.getElementById('choreCashLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Launching ChoreCash... This would navigate to your ChoreCash sub-app.');
-            // window.location.href = 'chorecash.html'; // Example for when the file exists
-        });
-
-        // Dynamic greeting based on time of day
-        const hour = new Date().getHours();
-        const headerP = document.querySelector('header p');
-        if (hour < 12) headerP.innerText = "Good Morning, Westlakes! Your apps are ready.";
-        else if (hour < 18) headerP.innerText = "Good Afternoon, Westlakes! Here is your dashboard.";
-        else headerP.innerText = "Good Evening, Westlakes! Checking in?";
-    </script>
 </body>
 </html>
