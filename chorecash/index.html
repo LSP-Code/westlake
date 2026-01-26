@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="ChoreCash">
     <meta name="theme-color" content="#8b5cf6">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
     
     <title>ChoreCash Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -29,7 +29,6 @@
             align-items: center; 
             justify-content: center; 
             padding: 15px;
-            /* Support for iPhone Notch and Home Bar */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -54,6 +53,13 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+        }
+
+        .logo-display {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
         }
 
         .auth-left h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
@@ -119,8 +125,9 @@
 
     <div id="authScreen" class="auth-container">
         <div class="auth-left">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" class="logo-display" alt="ChoreCash Logo">
             <h1>Welcome to<br>ChoreCash</h1>
-            <p>Manage family chores and track earnings in a clean, app-like experience.</p>
+            <p>The ultimate way to manage family chores, track progress, and reward hard work.</p>
         </div>
         
         <div id="loginView" class="auth-right">
@@ -146,7 +153,10 @@
 
     <div id="appScreen" class="dashboard">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-            <h2 id="roleHeader" style="font-weight: 800; color: white;">Command Center</h2>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:40px; height:auto;" alt="Logo">
+                <h2 id="roleHeader" style="font-weight: 800; color: white; font-size: 1.2rem;">Command Center</h2>
+            </div>
             <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; cursor: pointer;">Logout</button>
         </div>
 
@@ -193,7 +203,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Using LocalPersistence so the app stays logged in when closed/opened as a Home Screen App
     setPersistence(auth, browserLocalPersistence);
 
     let currentRole = null;
