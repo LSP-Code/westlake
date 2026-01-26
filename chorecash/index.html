@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ChoreCash">
+    <meta name="theme-color" content="#8b5cf6">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    
     <title>ChoreCash Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -12,7 +19,7 @@
             --bg-purple: #8b5cf6;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
             min-height: 100vh; 
@@ -22,6 +29,9 @@
             align-items: center; 
             justify-content: center; 
             padding: 15px;
+            /* Support for iPhone Notch and Home Bar */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* --- AUTH CONTAINER --- */
@@ -29,7 +39,7 @@
             width: 100%; 
             max-width: 1000px; 
             background: white; 
-            border-radius: 20px; 
+            border-radius: 25px; 
             display: flex; 
             flex-direction: column; 
             overflow: hidden;
@@ -38,33 +48,35 @@
 
         .auth-left { 
             background: var(--primary-grad); 
-            padding: 50px; 
+            padding: 40px; 
             color: white; 
             flex: 1.2;
-            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        .auth-left h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
-        .auth-left p { opacity: 0.9; font-size: 1.1rem; max-width: 400px; line-height: 1.6; }
+        .auth-left h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        .auth-left p { opacity: 0.9; font-size: 1rem; max-width: 400px; line-height: 1.6; }
 
-        .auth-right { flex: 1; padding: 50px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .auth-right { flex: 1; padding: 40px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .auth-right h2 { font-size: 0.8rem; letter-spacing: 3px; color: #6366f1; margin-bottom: 30px; font-weight: 700; }
 
-        @media (min-width: 850px) { .auth-container { flex-direction: row; min-height: 580px; } }
+        @media (min-width: 850px) {
+            .auth-container { flex-direction: row; min-height: 580px; }
+            .auth-left h1 { font-size: 3.5rem; }
+        }
 
         /* --- INPUTS --- */
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group span { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
         .input-field {
-            width: 100%; padding: 15px 20px 15px 50px; border-radius: 30px; 
-            border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 0.9rem;
+            width: 100%; padding: 18px 20px 18px 50px; border-radius: 35px; 
+            border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 1rem;
         }
 
         /* --- DASHBOARD --- */
-        .dashboard { width: 100%; max-width: 1100px; background: #f1f5f9; border-radius: 30px; padding: 30px; display: none; }
+        .dashboard { width: 100%; max-width: 1100px; display: none; }
         .dash-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 900px) { .dash-grid { grid-template-columns: 380px 1fr; } }
 
@@ -76,16 +88,22 @@
 
         .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); }
         .btn-main {
-            width: 100%; padding: 16px; border-radius: 30px; border: none;
+            width: 100%; padding: 18px; border-radius: 35px; border: none;
             background: var(--button-grad); color: white; font-weight: 700;
             cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
         }
 
         .btn-white {
             background: white; color: #6366f1; border: none; padding: 12px 25px; 
-            border-radius: 20px; font-weight: 800; cursor: pointer; margin-top: 10px;
+            border-radius: 20px; font-weight: 800; cursor: pointer; margin-top: 10px; width: 100%;
         }
+
+        .btn-action {
+            padding: 12px 20px; border-radius: 15px; border: none; font-weight: 700;
+            font-size: 0.85rem; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-start { background: #10b981; color: white; }
+        .btn-finish { background: #f59e0b; color: white; }
 
         .chore-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -102,17 +120,13 @@
     <div id="authScreen" class="auth-container">
         <div class="auth-left">
             <h1>Welcome to<br>ChoreCash</h1>
-            <p>Manage your family chores, track progress with real-time timestamps, and reward hard work.</p>
+            <p>Manage family chores and track earnings in a clean, app-like experience.</p>
         </div>
         
         <div id="loginView" class="auth-right">
             <h2>USER LOGIN</h2>
             <div class="input-group"><span>👤</span><input type="email" id="loginEmail" class="input-field" placeholder="Email Address"></div>
             <div class="input-group"><span>🔒</span><input type="password" id="loginPass" class="input-field" placeholder="Password"></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 0.75rem; color: #6366f1;">
-                <label><input type="checkbox" checked> Remember Me</label>
-                <span class="link-text">Forgot password?</span>
-            </div>
             <button class="btn-main" onclick="handleLogin()">LOGIN</button>
             <p class="auth-footer">Don't have an account? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
         </div>
@@ -121,7 +135,7 @@
             <h2>CREATE ACCOUNT</h2>
             <div class="input-group"><span>👤</span><input type="email" id="regEmail" class="input-field" placeholder="Email Address"></div>
             <div class="input-group"><span>🔒</span><input type="password" id="regPass" class="input-field" placeholder="Password"></div>
-            <select id="regRole" class="input-field" style="padding-left: 20px; margin-bottom: 15px;">
+            <select id="regRole" class="input-field" style="padding-left: 20px; margin-bottom: 15px; appearance: none; background-color: #f3f0ff;">
                 <option value="kid">Account Type: Kid</option>
                 <option value="parent">Account Type: Parent/Mom</option>
             </select>
@@ -132,8 +146,8 @@
 
     <div id="appScreen" class="dashboard">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-            <h2 id="roleHeader" style="font-weight: 800; color: #1e293b;">Command Center</h2>
-            <button onclick="handleLogout()" style="color: #ef4444; background: none; border: none; font-weight: 700; cursor: pointer;">Logout</button>
+            <h2 id="roleHeader" style="font-weight: 800; color: white;">Command Center</h2>
+            <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; cursor: pointer;">Logout</button>
         </div>
 
         <div class="dash-grid">
@@ -163,8 +177,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, setPersistence, browserSessionPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCinpQHRf32negN8ORvt7Ohl6VF9wjVys4",
@@ -179,7 +193,11 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    setPersistence(auth, browserSessionPersistence);
+    // Using LocalPersistence so the app stays logged in when closed/opened as a Home Screen App
+    setPersistence(auth, browserLocalPersistence);
+
+    let currentRole = null;
+    let isProcessing = false;
 
     window.toggleAuth = () => {
         document.getElementById('loginView').classList.toggle('hidden');
@@ -190,7 +208,6 @@
         const e = document.getElementById('loginEmail').value;
         const p = document.getElementById('loginPass').value;
         try { 
-            await signOut(auth); 
             await signInWithEmailAndPassword(auth, e, p);
         } catch(err) { alert(err.message); }
     };
@@ -200,7 +217,6 @@
         const p = document.getElementById('regPass').value;
         const r = document.getElementById('regRole').value;
         try { 
-            await signOut(auth);
             const cred = await createUserWithEmailAndPassword(auth, e, p);
             await setDoc(doc(db, "users", cred.user.uid), { email: e, role: r });
         } catch(err) { alert(err.message); }
@@ -209,6 +225,7 @@
     window.handleLogout = () => signOut(auth).then(() => window.location.reload());
 
     function applyPermissions(role) {
+        currentRole = role;
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('appScreen').style.display = 'block';
 
@@ -218,7 +235,6 @@
             document.getElementById('kidResetBtn').classList.remove('hidden');
             document.getElementById('parentAssignSection').classList.add('hidden');
         } else {
-            // Parent is the only one who can deploy chores
             document.getElementById('roleHeader').innerText = "Parent Command Center";
             document.getElementById('balanceLabel').innerText = "UNPAID EARNINGS";
             document.getElementById('kidResetBtn').classList.add('hidden');
@@ -243,14 +259,34 @@
         onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
             document.getElementById('balanceDisplay').innerText = `$${(s.exists() ? s.data().amount : 0).toFixed(2)}`;
         });
+
         onSnapshot(collection(db, "chores"), (snap) => {
             const list = document.getElementById('choreList');
-            list.innerHTML = snap.empty ? '<p style="color:#94a3b8; text-align:center; margin-top:20px;">No active tasks.</p>' : '';
+            list.innerHTML = snap.empty ? '<p style="color:#94a3b8; text-align:center;">No active tasks.</p>' : '';
             snap.forEach(d => {
                 const c = d.data();
-                list.innerHTML += `<div class="chore-item"><b>${c.name}</b> <span style="color:#6366f1; font-weight:800;">$${c.price.toFixed(2)}</span></div>`;
+                const id = d.id;
+                let actionBtn = '';
+                
+                if (currentRole === 'kid') {
+                    if (!c.startTime) {
+                        actionBtn = `<button class="btn-action btn-start" onclick="startChore('${id}')">Start</button>`;
+                    } else {
+                        actionBtn = `<button id="btn-${id}" class="btn-action btn-finish" onclick="finishChore('${id}', '${c.name}', ${c.price})">Finish</button>`;
+                    }
+                }
+
+                list.innerHTML += `
+                    <div class="chore-item">
+                        <div><b>${c.name}</b></div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="color:#6366f1; font-weight:800;">$${c.price.toFixed(2)}</span>
+                            ${actionBtn}
+                        </div>
+                    </div>`;
             });
         });
+
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(5)), (snap) => {
             const hList = document.getElementById('historyList');
             hList.innerHTML = '';
@@ -265,10 +301,34 @@
         const n = document.getElementById('taskName').value;
         const p = parseFloat(document.getElementById('taskPrice').value);
         if(n && p) {
-            await addDoc(collection(db, "chores"), { name: n, price: p, completedAt: null });
+            await addDoc(collection(db, "chores"), { name: n, price: p, startTime: null });
             document.getElementById('taskName').value = '';
             document.getElementById('taskPrice').value = '';
         }
+    };
+
+    window.startChore = async (id) => {
+        await updateDoc(doc(db, "chores", id), { startTime: serverTimestamp() });
+    };
+
+    window.finishChore = async (id, name, price) => {
+        if (isProcessing) return;
+        isProcessing = true;
+        try {
+            await runTransaction(db, async (transaction) => {
+                const choreRef = doc(db, "chores", id);
+                const choreSnap = await transaction.get(choreRef);
+                if (!choreSnap.exists()) return;
+
+                const balanceRef = doc(db, "appData", "sharedBalance");
+                const balanceSnap = await transaction.get(balanceRef);
+                const currentBalance = balanceSnap.exists() ? balanceSnap.data().amount : 0;
+
+                transaction.update(balanceRef, { amount: currentBalance + price });
+                transaction.delete(choreRef);
+                transaction.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
+            });
+        } catch (e) { console.error(e); } finally { isProcessing = false; }
     };
 
     window.resetBalance = async () => {
