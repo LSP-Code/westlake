@@ -37,7 +37,7 @@
         }
 
         .logo-display { 
-            width: 100px; height: auto; margin-bottom: 20px; 
+            width: 80px; height: auto; margin-bottom: 20px; 
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); 
         }
 
@@ -56,12 +56,19 @@
 
         @media (min-width: 850px) { .auth-container { flex-direction: row; min-height: 580px; } }
 
-        /* --- DASHBOARD & UI --- */
-        .input-group { position: relative; margin-bottom: 15px; }
-        .input-group span { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
+        /* --- DASHBOARD & MOBILE FIXES --- */
+        .input-group { position: relative; margin-bottom: 15px; width: 100%; }
+        .input-group span { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); z-index: 2; font-size: 1.1rem; }
+        
         .input-field {
-            width: 100%; padding: 18px 20px 18px 50px; border-radius: 35px; 
-            border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 1rem;
+            width: 100%; padding: 16px 15px 16px 50px; border-radius: 35px; 
+            border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 0.95rem;
+            display: block; -webkit-appearance: none;
+        }
+
+        /* Specifically target date and select to prevent overflow on mobile */
+        input[type="date"].input-field, select.input-field {
+            min-height: 54px;
         }
 
         .dashboard { width: 100%; max-width: 1100px; display: none; }
@@ -71,28 +78,28 @@
         .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; }
         .amount { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
 
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
         
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; }
-        .tab { flex: 1; padding: 12px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; }
+        .tab { flex: 1; padding: 12px 5px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; }
         .tab.active { background: white; color: var(--bg-purple); }
 
         .btn-main {
-            width: 100%; padding: 18px; border-radius: 35px; border: none;
-            background: var(--button-grad); color: white; font-weight: 700; cursor: pointer; text-transform: uppercase;
+            width: 100%; padding: 16px; border-radius: 35px; border: none;
+            background: var(--button-grad); color: white; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.9rem;
         }
 
-        .btn-action { padding: 10px 18px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
+        .btn-action { padding: 10px 15px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
         .btn-start { background: #10b981; color: white; }
         .btn-finish { background: #f59e0b; color: white; }
         .btn-locked { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
 
         .chore-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
-        .schedule-tag { font-size: 0.7rem; color: #6366f1; font-weight: 700; display: block; }
+        .schedule-tag { font-size: 0.65rem; color: #6366f1; font-weight: 700; display: block; }
 
         .clear-btn {
-            background: none; border: none; color: #ec4899; font-weight: 700; font-size: 0.75rem; 
-            cursor: pointer; text-transform: uppercase; margin-left: auto;
+            background: none; border: none; color: #ec4899; font-weight: 700; font-size: 0.7rem; 
+            cursor: pointer; text-transform: uppercase;
         }
 
         .hidden { display: none !important; }
@@ -106,7 +113,7 @@
         <div class="auth-left">
             <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" class="logo-display">
             <h1>Welcome to<br>ChoreCash</h1>
-            <p>The ultimate way to manage family chores, track progress, and reward hard work.</p>
+            <p>The ultimate way to manage family chores and rewards.</p>
         </div>
         
         <div id="loginView" class="auth-right">
@@ -124,10 +131,13 @@
             <form onsubmit="event.preventDefault(); handleSignup();">
                 <div class="input-group"><span>👤</span><input type="email" id="regEmail" class="input-field" placeholder="Email Address" required></div>
                 <div class="input-group"><span>🔒</span><input type="password" id="regPass" class="input-field" placeholder="Password" required></div>
-                <select id="regRole" class="input-field" style="padding-left: 20px; margin-bottom: 15px; appearance: none; background-color: #f3f0ff;">
-                    <option value="kid">Account Type: Kid</option>
-                    <option value="parent">Account Type: Parent/Mom</option>
-                </select>
+                <div class="input-group">
+                    <span>👑</span>
+                    <select id="regRole" class="input-field">
+                        <option value="kid">Account Type: Kid</option>
+                        <option value="parent">Account Type: Parent/Mom</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn-main">SIGN UP</button>
             </form>
             <p class="auth-footer">Back to <span class="link-text" onclick="toggleAuth()">Login</span></p>
@@ -135,9 +145,9 @@
     </div>
 
     <div id="appScreen" class="dashboard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:40px; height:auto;">
-            <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700;">Logout</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding: 0 5px;">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px; height:auto;">
+            <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
         </div>
 
         <div class="tab-bar">
@@ -147,33 +157,31 @@
         </div>
 
         <div class="dash-grid">
-            <div>
-                <div class="balance-card">
-                    <h3 id="balanceLabel" style="font-size:0.7rem; opacity:0.8;">BALANCE</h3>
-                    <div id="balanceDisplay" class="amount">$0.00</div>
-                    <button id="kidResetBtn" onclick="resetBalance()" class="btn-main" style="background:white; color:#6366f1; font-size:0.8rem; padding:10px; margin-top:10px;">PAY & RESET</button>
-                </div>
+            <div class="balance-card">
+                <h3 id="balanceLabel" style="font-size:0.65rem; opacity:0.8; letter-spacing: 1px;">BALANCE</h3>
+                <div id="balanceDisplay" class="amount">$0.00</div>
+                <button id="kidResetBtn" onclick="resetBalance()" class="btn-main" style="background:white; color:#6366f1; font-size:0.75rem; padding:10px; margin-top:10px;">PAY & RESET</button>
             </div>
 
             <div id="mainCol">
                 <div id="activeSection" class="section">
                     <div class="card">
-                        <h4 style="margin-bottom:15px;">Active Task Board</h4>
+                        <h4 style="margin-bottom:12px; font-size: 0.9rem;">Active Tasks</h4>
                         <div id="choreList"></div>
                     </div>
                 </div>
 
                 <div id="upcomingSection" class="section hidden">
                     <div class="card">
-                        <h4 style="margin-bottom:15px;">Scheduled for Future</h4>
+                        <h4 style="margin-bottom:12px; font-size: 0.9rem;">Future Tasks</h4>
                         <div id="upcomingList"></div>
                     </div>
                 </div>
 
                 <div id="scheduleSection" class="section hidden">
                     <div class="card">
-                        <h4>Schedule New Task</h4>
-                        <div class="input-group" style="margin-top:15px;"><span>📝</span><input type="text" id="taskName" class="input-field" placeholder="Task Name"></div>
+                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Schedule New Task</h4>
+                        <div class="input-group"><span>📝</span><input type="text" id="taskName" class="input-field" placeholder="Task Name"></div>
                         <div class="input-group"><span>💰</span><input type="number" id="taskPrice" class="input-field" placeholder="Value ($)"></div>
                         <div class="input-group"><span>📅</span><input type="date" id="taskDate" class="input-field"></div>
                         <div class="input-group">
@@ -189,9 +197,9 @@
                 </div>
 
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h4>Recent Activity</h4>
-                        <button id="clearHistoryBtn" class="clear-btn hidden" onclick="clearActivity()">Clear All</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h4 style="font-size: 0.9rem;">Recent Activity</h4>
+                        <button id="clearHistoryBtn" class="clear-btn hidden" onclick="clearActivity()">CLEAR ALL</button>
                     </div>
                     <div id="historyList"></div>
                 </div>
@@ -231,11 +239,8 @@
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tab + 'Section').classList.remove('hidden');
-        if (event && event.target && event.target.classList.contains('tab')) {
-            event.target.classList.add('active');
-        } else {
-            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
-        }
+        const activeTab = document.querySelector(`[onclick="switchTab('${tab}')"]`);
+        if (activeTab) activeTab.classList.add('active');
     };
 
     window.handleLogin = async () => {
@@ -295,31 +300,34 @@
             const upcomingList = document.getElementById('upcomingList');
             activeList.innerHTML = ''; upcomingList.innerHTML = '';
             
-            const todayStr = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
 
             snap.forEach(d => {
                 const c = d.data();
                 const id = d.id;
-                const isToday = c.date <= todayStr;
+                const isTodayOrPast = c.date <= todayStr;
 
                 const itemHtml = `
                     <div class="chore-item">
-                        <div>
+                        <div style="flex: 1; padding-right: 10px;">
                             <span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date} ${c.repeat !== 'none' ? ' (Repeating)' : ''}</span>
-                            <b>${c.name}</b>
+                            <b style="font-size: 0.85rem;">${c.name}</b>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="color:#6366f1; font-weight:800;">$${c.price.toFixed(2)}</span>
-                            ${getActionButton(id, c, isToday)}
+                            <span style="color:#6366f1; font-weight:800; font-size:0.9rem;">$${c.price.toFixed(2)}</span>
+                            ${getActionButton(id, c, isTodayOrPast)}
                         </div>
                     </div>`;
 
-                if (isToday && c.status === 'active') {
+                if (isTodayOrPast && c.status === 'active') {
                     activeList.innerHTML += itemHtml;
                 } else if (c.status === 'scheduled') {
                     upcomingList.innerHTML += itemHtml;
                 }
             });
+            if (!activeList.innerHTML) activeList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px;">No active tasks.</p>';
+            if (!upcomingList.innerHTML) upcomingList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px;">No scheduled tasks.</p>';
         });
 
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
@@ -327,15 +335,15 @@
             hList.innerHTML = snap.empty ? '<p style="color:#94a3b8; text-align:center; font-size:0.8rem;">No recent activity.</p>' : '';
             snap.forEach(d => {
                 const h = d.data();
-                hList.innerHTML += `<div class="chore-item" style="opacity:0.6; font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
+                hList.innerHTML += `<div class="chore-item" style="opacity:0.6; font-size:0.75rem; padding: 10px 15px;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
             });
         });
     }
 
-    function getActionButton(id, c, isToday) {
-        if (currentRole === 'parent') return `<button onclick="deleteChore('${id}')" style="background:none; border:none; color:#ec4899; font-weight:bold; padding:5px;">✕</button>`;
+    function getActionButton(id, c, isTodayOrPast) {
+        if (currentRole === 'parent') return `<button onclick="deleteChore('${id}')" style="background:none; border:none; color:#ec4899; font-weight:bold; font-size: 1.2rem; cursor:pointer;">✕</button>`;
         if (c.status === 'scheduled') {
-            return isToday 
+            return isTodayOrPast 
                 ? `<button class="btn-action btn-start" onclick="activateChore('${id}')">Accept</button>`
                 : `<button class="btn-action btn-locked" disabled>Locked</button>`;
         }
