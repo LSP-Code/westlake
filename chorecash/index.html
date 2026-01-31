@@ -111,21 +111,25 @@
         
         <div id="loginView" class="auth-right">
             <h2>USER LOGIN</h2>
-            <div class="input-group"><span>👤</span><input type="email" id="loginEmail" class="input-field" placeholder="Email Address"></div>
-            <div class="input-group"><span>🔒</span><input type="password" id="loginPass" class="input-field" placeholder="Password"></div>
-            <button class="btn-main" onclick="handleLogin()">LOGIN</button>
+            <form onsubmit="event.preventDefault(); handleLogin();">
+                <div class="input-group"><span>👤</span><input type="email" id="loginEmail" class="input-field" placeholder="Email Address" required></div>
+                <div class="input-group"><span>🔒</span><input type="password" id="loginPass" class="input-field" placeholder="Password" required></div>
+                <button type="submit" class="btn-main">LOGIN</button>
+            </form>
             <p class="auth-footer">Don't have an account? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
         </div>
 
         <div id="signupView" class="auth-right hidden">
             <h2>CREATE ACCOUNT</h2>
-            <div class="input-group"><span>👤</span><input type="email" id="regEmail" class="input-field" placeholder="Email Address"></div>
-            <div class="input-group"><span>🔒</span><input type="password" id="regPass" class="input-field" placeholder="Password"></div>
-            <select id="regRole" class="input-field" style="padding-left: 20px; margin-bottom: 15px; appearance: none; background-color: #f3f0ff;">
-                <option value="kid">Account Type: Kid</option>
-                <option value="parent">Account Type: Parent/Mom</option>
-            </select>
-            <button class="btn-main" onclick="handleSignup()">SIGN UP</button>
+            <form onsubmit="event.preventDefault(); handleSignup();">
+                <div class="input-group"><span>👤</span><input type="email" id="regEmail" class="input-field" placeholder="Email Address" required></div>
+                <div class="input-group"><span>🔒</span><input type="password" id="regPass" class="input-field" placeholder="Password" required></div>
+                <select id="regRole" class="input-field" style="padding-left: 20px; margin-bottom: 15px; appearance: none; background-color: #f3f0ff;">
+                    <option value="kid">Account Type: Kid</option>
+                    <option value="parent">Account Type: Parent/Mom</option>
+                </select>
+                <button type="submit" class="btn-main">SIGN UP</button>
+            </form>
             <p class="auth-footer">Back to <span class="link-text" onclick="toggleAuth()">Login</span></p>
         </div>
     </div>
@@ -227,7 +231,11 @@
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tab + 'Section').classList.remove('hidden');
-        if (event) event.target.classList.add('active');
+        if (event && event.target && event.target.classList.contains('tab')) {
+            event.target.classList.add('active');
+        } else {
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+        }
     };
 
     window.handleLogin = async () => {
