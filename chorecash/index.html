@@ -25,7 +25,7 @@
             padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- RESTORED LOGIN SCREEN CSS --- */
+        /* --- LOGIN SCREEN DESIGN --- */
         .auth-container { 
             width: 100%; max-width: 1000px; background: white; border-radius: 25px; 
             display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
@@ -56,7 +56,7 @@
 
         @media (min-width: 850px) { .auth-container { flex-direction: row; min-height: 580px; } }
 
-        /* --- DASHBOARD & UI COMPONENTS --- */
+        /* --- DASHBOARD & UI --- */
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group span { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
         .input-field {
@@ -89,6 +89,11 @@
 
         .chore-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
         .schedule-tag { font-size: 0.7rem; color: #6366f1; font-weight: 700; display: block; }
+
+        .clear-btn {
+            background: none; border: none; color: #ec4899; font-weight: 700; font-size: 0.75rem; 
+            cursor: pointer; text-transform: uppercase; margin-left: auto;
+        }
 
         .hidden { display: none !important; }
         .link-text { color: #6366f1; font-weight: 600; cursor: pointer; }
@@ -180,7 +185,10 @@
                 </div>
 
                 <div class="card">
-                    <h4 style="margin-bottom:15px;">Recent Activity</h4>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h4>Recent Activity</h4>
+                        <button id="clearHistoryBtn" class="clear-btn hidden" onclick="clearActivity()">Clear All</button>
+                    </div>
                     <div id="historyList"></div>
                 </div>
             </div>
@@ -190,7 +198,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, where, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCinpQHRf32negN8ORvt7Ohl6VF9wjVys4",
@@ -219,7 +227,7 @@
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tab + 'Section').classList.remove('hidden');
-        event.target.classList.add('active');
+        if (event) event.target.classList.add('active');
     };
 
     window.handleLogin = async () => {
@@ -260,9 +268,11 @@
         if (role === 'parent') {
             document.getElementById('parentSchedBtn').classList.remove('hidden');
             document.getElementById('kidResetBtn').classList.remove('hidden');
+            document.getElementById('clearHistoryBtn').classList.remove('hidden');
             document.getElementById('balanceLabel').innerText = "UNPAID EARNINGS";
         } else {
             document.getElementById('kidResetBtn').classList.add('hidden');
+            document.getElementById('clearHistoryBtn').classList.add('hidden');
             document.getElementById('balanceLabel').innerText = "AVAILABLE BALANCE";
         }
     }
@@ -304,9 +314,9 @@
             });
         });
 
-        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(5)), (snap) => {
+        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
             const hList = document.getElementById('historyList');
-            hList.innerHTML = '';
+            hList.innerHTML = snap.empty ? '<p style="color:#94a3b8; text-align:center; font-size:0.8rem;">No recent activity.</p>' : '';
             snap.forEach(d => {
                 const h = d.data();
                 hList.innerHTML += `<div class="chore-item" style="opacity:0.6; font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
@@ -315,14 +325,12 @@
     }
 
     function getActionButton(id, c, isToday) {
-        if (currentRole === 'parent') return `<button onclick="deleteChore('${id}')" style="background:none; border:none; color:red; font-weight:bold; padding:5px;">✕</button>`;
-        
+        if (currentRole === 'parent') return `<button onclick="deleteChore('${id}')" style="background:none; border:none; color:#ec4899; font-weight:bold; padding:5px;">✕</button>`;
         if (c.status === 'scheduled') {
             return isToday 
                 ? `<button class="btn-action btn-start" onclick="activateChore('${id}')">Accept</button>`
                 : `<button class="btn-action btn-locked" disabled>Locked</button>`;
         }
-        
         return !c.startTime 
             ? `<button class="btn-action btn-start" onclick="startChore('${id}')">Start</button>`
             : `<button id="btn-${id}" class="btn-action btn-finish" onclick="finishChore('${id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>`;
@@ -342,7 +350,6 @@
     };
 
     window.activateChore = async (id) => { await updateDoc(doc(db, "chores", id), { status: 'active' }); };
-
     window.startChore = async (id) => { await updateDoc(doc(db, "chores", id), { startTime: serverTimestamp() }); };
 
     window.finishChore = async (id, name, price, repeat) => {
@@ -354,21 +361,15 @@
                 const balanceRef = doc(db, "appData", "sharedBalance");
                 const bSnap = await transaction.get(balanceRef);
                 const currentBalance = bSnap.exists() ? bSnap.data().amount : 0;
-
                 transaction.update(balanceRef, { amount: currentBalance + price });
                 transaction.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
-
                 if (repeat === 'none') {
                     transaction.delete(choreRef);
                 } else {
                     let nextDate = new Date();
                     if (repeat === 'daily') nextDate.setDate(nextDate.getDate() + 1);
                     if (repeat === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
-                    transaction.update(choreRef, { 
-                        status: 'scheduled', 
-                        startTime: null, 
-                        date: nextDate.toISOString().split('T')[0] 
-                    });
+                    transaction.update(choreRef, { status: 'scheduled', startTime: null, date: nextDate.toISOString().split('T')[0] });
                 }
             });
         } catch (e) { console.error(e); } finally { isProcessing = false; }
@@ -376,6 +377,16 @@
 
     window.deleteChore = async (id) => { if(confirm("Delete this task?")) await deleteDoc(doc(db, "chores", id)); };
     window.resetBalance = async () => { if(confirm("Reset all earnings?")) await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 }); };
+
+    window.clearActivity = async () => {
+        if(confirm("Permanently clear all recent activity?")) {
+            const q = query(collection(db, "history"));
+            const snap = await getDocs(q);
+            const batch = writeBatch(db);
+            snap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+        }
+    };
 </script>
 </body>
 </html>
