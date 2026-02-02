@@ -8,6 +8,9 @@
     <meta name="apple-mobile-web-app-title" content="ChoreCash">
     <meta name="theme-color" content="#8b5cf6">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%238b5cf6%22,%22theme_color%22:%22%238b5cf6%22}">
+
     <title>ChoreCash Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -25,7 +28,6 @@
             padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- NOTIFICATION TOAST --- */
         #notification-toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: white; padding: 15px 25px; border-radius: 50px;
@@ -35,46 +37,20 @@
         }
         @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
 
-        /* --- RESTORED ORIGINAL LOGIN DESIGN --- */
         .auth-container { 
             width: 100%; max-width: 1000px; background: white; border-radius: 25px; 
             display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
         }
-
-        .auth-left { 
-            background: var(--primary-grad); padding: 40px; color: white; flex: 1.2; 
-            display: flex; flex-direction: column; justify-content: center;
-        }
-
-        .logo-display { 
-            width: 80px; height: auto; margin-bottom: 20px; 
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); 
-        }
-
+        .auth-left { background: var(--primary-grad); padding: 40px; color: white; flex: 1.2; display: flex; flex-direction: column; justify-content: center; }
+        .logo-display { width: 80px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
         .auth-left h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
-        .auth-left p { opacity: 0.9; font-size: 1rem; max-width: 400px; line-height: 1.6; }
-
-        .auth-right { 
-            flex: 1; padding: 40px 30px; text-align: center; 
-            display: flex; flex-direction: column; justify-content: center; 
-        }
-        
-        .auth-right h2 { 
-            font-size: 0.8rem; letter-spacing: 3px; color: #6366f1; 
-            margin-bottom: 30px; font-weight: 700; text-transform: uppercase;
-        }
-
+        .auth-right { flex: 1; padding: 40px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .auth-right h2 { font-size: 0.8rem; letter-spacing: 3px; color: #6366f1; margin-bottom: 30px; font-weight: 700; text-transform: uppercase; }
         @media (min-width: 850px) { .auth-container { flex-direction: row; min-height: 580px; } }
 
-        /* --- DASHBOARD --- */
         .input-group { position: relative; margin-bottom: 15px; width: 100%; }
-        .input-group span { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); z-index: 2; font-size: 1.1rem; }
-        
-        .input-field {
-            width: 100%; padding: 16px 15px 16px 50px; border-radius: 35px; 
-            border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 0.95rem;
-            display: block; -webkit-appearance: none;
-        }
+        .input-group span { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); z-index: 2; }
+        .input-field { width: 100%; padding: 16px 15px 16px 50px; border-radius: 35px; border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 0.95rem; display: block; -webkit-appearance: none; }
 
         .dashboard { width: 100%; max-width: 1100px; display: none; }
         .dash-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
@@ -82,18 +58,12 @@
 
         .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; }
         .amount { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
-
         .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
-        
         .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; overflow-x: auto; }
         .tab { flex: 1; padding: 12px 10px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
         .tab.active { background: white; color: var(--bg-purple); }
 
-        .btn-main {
-            width: 100%; padding: 16px; border-radius: 35px; border: none;
-            background: var(--button-grad); color: white; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.9rem;
-        }
-
+        .btn-main { width: 100%; padding: 16px; border-radius: 35px; border: none; background: var(--button-grad); color: white; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; }
         .btn-action { padding: 10px 15px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
         .btn-start { background: #10b981; color: white; }
         .btn-finish { background: #f59e0b; color: white; }
@@ -101,12 +71,7 @@
 
         .chore-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
         .schedule-tag { font-size: 0.65rem; color: #6366f1; font-weight: 700; display: block; }
-
-        .clear-btn {
-            background: none; border: none; color: #ec4899; font-weight: 700; font-size: 0.7rem; 
-            cursor: pointer; text-transform: uppercase;
-        }
-
+        .clear-btn { background: none; border: none; color: #ec4899; font-weight: 700; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
         .hidden { display: none !important; }
         .link-text { color: #6366f1; font-weight: 600; cursor: pointer; }
     </style>
@@ -156,7 +121,10 @@
     <div id="appScreen" class="dashboard">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px;">
-            <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
+            <div>
+                <button onclick="requestNotificationPermission()" id="notifBtn" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 12px; margin-right: 5px; cursor: pointer;">🔔</button>
+                <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
+            </div>
         </div>
 
         <div class="tab-bar">
@@ -244,8 +212,38 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const DEV_EMAIL = "loganwestlake933@gmail.com";
     let currentRole = null;
     let lastHistoryId = null;
+
+    // --- SERVICE WORKER REGISTRATION (Essential for iPhone Push) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const blob = new Blob([`
+                self.addEventListener('push', (event) => {
+                    const data = event.data.json();
+                    self.registration.showNotification(data.title, { body: data.body, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' });
+                });
+            `], { type: 'text/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).then(reg => console.log('SW Registered')).catch(err => console.log('SW Fail', err));
+        });
+    }
+
+    // --- iOS NOTIFICATION PERMISSION TRIGGER ---
+    window.requestNotificationPermission = async () => {
+        if (!('Notification' in window)) {
+            alert("This browser does not support desktop notification");
+            return;
+        }
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            showNotification("Notifications enabled!", "✅");
+            document.getElementById('notifBtn').style.display = 'none';
+        } else {
+            alert("Please allow notifications in your iPhone settings for this app.");
+        }
+    };
 
     window.toggleAuth = () => {
         document.getElementById('loginView').classList.toggle('hidden');
@@ -266,15 +264,26 @@
         document.getElementById('notif-icon').innerText = icon;
         toast.style.display = 'flex';
         setTimeout(() => toast.style.display = 'none', 4000);
+
+        // Native Browser Notification (if permission granted)
+        if (Notification.permission === "granted") {
+            new Notification(icon + " ChoreCash", { body: text });
+        }
     }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                currentRole = userDoc.data().role;
-                setupDashboard(currentRole);
+            if (user.email === DEV_EMAIL) {
+                currentRole = 'parent';
+                setupDashboard('parent');
                 loadData();
+            } else {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    currentRole = userDoc.data().role;
+                    setupDashboard(currentRole);
+                    loadData();
+                }
             }
         } else {
             document.getElementById('authScreen').style.display = 'flex';
@@ -289,6 +298,15 @@
             document.getElementById('parentSchedBtn').classList.remove('hidden');
             document.getElementById('kidResetBtn').classList.remove('hidden');
             document.getElementById('clearHistoryBtn').classList.remove('hidden');
+        } else {
+            document.getElementById('parentSchedBtn').classList.add('hidden');
+            document.getElementById('kidResetBtn').classList.add('hidden');
+            document.getElementById('clearHistoryBtn').classList.add('hidden');
+        }
+        
+        // Hide bell if already granted
+        if (Notification.permission === "granted") {
+            document.getElementById('notifBtn').style.display = 'none';
         }
     }
 
