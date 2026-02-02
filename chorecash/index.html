@@ -25,7 +25,17 @@
             padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- LOGIN SCREEN DESIGN --- */
+        /* --- NOTIFICATION TOAST --- */
+        #notification-toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 15px 25px; border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
+            display: none; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;
+            border-left: 5px solid #a855f7; animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+
+        /* --- RESTORED ORIGINAL LOGIN DESIGN --- */
         .auth-container { 
             width: 100%; max-width: 1000px; background: white; border-radius: 25px; 
             display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
@@ -56,7 +66,7 @@
 
         @media (min-width: 850px) { .auth-container { flex-direction: row; min-height: 580px; } }
 
-        /* --- DASHBOARD & MOBILE FIXES --- */
+        /* --- DASHBOARD --- */
         .input-group { position: relative; margin-bottom: 15px; width: 100%; }
         .input-group span { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); z-index: 2; font-size: 1.1rem; }
         
@@ -66,11 +76,6 @@
             display: block; -webkit-appearance: none;
         }
 
-        /* Specifically target date and select to prevent overflow on mobile */
-        input[type="date"].input-field, select.input-field {
-            min-height: 54px;
-        }
-
         .dashboard { width: 100%; max-width: 1100px; display: none; }
         .dash-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 900px) { .dash-grid { grid-template-columns: 380px 1fr; } }
@@ -78,10 +83,10 @@
         .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; }
         .amount { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
 
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
+        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
         
-        .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; }
-        .tab { flex: 1; padding: 12px 5px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; overflow-x: auto; }
+        .tab { flex: 1; padding: 12px 10px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
         .tab.active { background: white; color: var(--bg-purple); }
 
         .btn-main {
@@ -104,10 +109,14 @@
 
         .hidden { display: none !important; }
         .link-text { color: #6366f1; font-weight: 600; cursor: pointer; }
-        .auth-footer { font-size: 0.8rem; margin-top: 25px; color: #64748b; }
     </style>
 </head>
 <body>
+
+    <div id="notification-toast">
+        <span id="notif-icon">🔔</span>
+        <span id="notif-text">Notification</span>
+    </div>
 
     <div id="authScreen" class="auth-container">
         <div class="auth-left">
@@ -123,7 +132,7 @@
                 <div class="input-group"><span>🔒</span><input type="password" id="loginPass" class="input-field" placeholder="Password" required></div>
                 <button type="submit" class="btn-main">LOGIN</button>
             </form>
-            <p class="auth-footer">Don't have an account? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
+            <p style="margin-top:20px; font-size:0.8rem;">Don't have an account? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
         </div>
 
         <div id="signupView" class="auth-right hidden">
@@ -140,25 +149,26 @@
                 </div>
                 <button type="submit" class="btn-main">SIGN UP</button>
             </form>
-            <p class="auth-footer">Back to <span class="link-text" onclick="toggleAuth()">Login</span></p>
+            <p style="margin-top:20px; font-size:0.8rem;">Back to <span class="link-text" onclick="toggleAuth()">Login</span></p>
         </div>
     </div>
 
     <div id="appScreen" class="dashboard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding: 0 5px;">
-            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px; height:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px;">
             <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
         </div>
 
         <div class="tab-bar">
             <button class="tab active" onclick="switchTab('active')">BOARD</button>
-            <button class="tab" id="upcomingTabBtn" onclick="switchTab('upcoming')">UPCOMING</button>
+            <button class="tab" onclick="switchTab('upcoming')">UPCOMING</button>
+            <button class="tab" onclick="switchTab('payouts')">PAYOUTS</button>
             <button class="tab hidden" id="parentSchedBtn" onclick="switchTab('schedule')">SCHEDULE</button>
         </div>
 
         <div class="dash-grid">
             <div class="balance-card">
-                <h3 id="balanceLabel" style="font-size:0.65rem; opacity:0.8; letter-spacing: 1px;">BALANCE</h3>
+                <h3 id="balanceLabel" style="font-size:0.65rem; opacity:0.8;">BALANCE</h3>
                 <div id="balanceDisplay" class="amount">$0.00</div>
                 <button id="kidResetBtn" onclick="resetBalance()" class="btn-main" style="background:white; color:#6366f1; font-size:0.75rem; padding:10px; margin-top:10px;">PAY & RESET</button>
             </div>
@@ -166,38 +176,47 @@
             <div id="mainCol">
                 <div id="activeSection" class="section">
                     <div class="card">
-                        <h4 style="margin-bottom:12px; font-size: 0.9rem;">Active Tasks</h4>
+                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Active Tasks</h4>
                         <div id="choreList"></div>
                     </div>
                 </div>
 
                 <div id="upcomingSection" class="section hidden">
                     <div class="card">
-                        <h4 style="margin-bottom:12px; font-size: 0.9rem;">Future Tasks</h4>
+                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Future Tasks</h4>
                         <div id="upcomingList"></div>
+                    </div>
+                </div>
+
+                <div id="payoutsSection" class="section hidden">
+                    <div class="card">
+                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Payout History</h4>
+                        <div id="payoutList"></div>
                     </div>
                 </div>
 
                 <div id="scheduleSection" class="section hidden">
                     <div class="card">
                         <h4 style="margin-bottom:15px; font-size: 0.9rem;">Schedule New Task</h4>
-                        <div class="input-group"><span>📝</span><input type="text" id="taskName" class="input-field" placeholder="Task Name"></div>
-                        <div class="input-group"><span>💰</span><input type="number" id="taskPrice" class="input-field" placeholder="Value ($)"></div>
-                        <div class="input-group"><span>📅</span><input type="date" id="taskDate" class="input-field"></div>
-                        <div class="input-group">
-                            <span>🔄</span>
-                            <select id="taskRepeat" class="input-field">
-                                <option value="none">One Time Only</option>
-                                <option value="daily">Repeats Daily</option>
-                                <option value="weekly">Repeats Weekly</option>
-                            </select>
-                        </div>
-                        <button class="btn-main" onclick="createChore()">SCHEDULE TASK</button>
+                        <form onsubmit="event.preventDefault(); createChore();">
+                            <div class="input-group"><span>📝</span><input type="text" id="taskName" class="input-field" placeholder="Task Name" required></div>
+                            <div class="input-group"><span>💰</span><input type="number" id="taskPrice" class="input-field" placeholder="Value ($)" step="0.01" required></div>
+                            <div class="input-group"><span>📅</span><input type="date" id="taskDate" class="input-field" required></div>
+                            <div class="input-group">
+                                <span>🔄</span>
+                                <select id="taskRepeat" class="input-field">
+                                    <option value="none">One Time Only</option>
+                                    <option value="daily">Repeats Daily</option>
+                                    <option value="weekly">Repeats Weekly</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-main">SCHEDULE TASK</button>
+                        </form>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                         <h4 style="font-size: 0.9rem;">Recent Activity</h4>
                         <button id="clearHistoryBtn" class="clear-btn hidden" onclick="clearActivity()">CLEAR ALL</button>
                     </div>
@@ -209,8 +228,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, where, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCinpQHRf32negN8ORvt7Ohl6VF9wjVys4",
@@ -225,10 +244,8 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    setPersistence(auth, browserLocalPersistence);
-
     let currentRole = null;
-    let isProcessing = false;
+    let lastHistoryId = null;
 
     window.toggleAuth = () => {
         document.getElementById('loginView').classList.toggle('hidden');
@@ -239,27 +256,17 @@
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tab + 'Section').classList.remove('hidden');
-        const activeTab = document.querySelector(`[onclick="switchTab('${tab}')"]`);
-        if (activeTab) activeTab.classList.add('active');
+        const target = [...document.querySelectorAll('.tab')].find(t => t.innerText.toLowerCase() === tab.toLowerCase() || (tab === 'active' && t.innerText === 'BOARD'));
+        if (target) target.classList.add('active');
     };
 
-    window.handleLogin = async () => {
-        const e = document.getElementById('loginEmail').value;
-        const p = document.getElementById('loginPass').value;
-        try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { alert(err.message); }
-    };
-
-    window.handleSignup = async () => {
-        const e = document.getElementById('regEmail').value;
-        const p = document.getElementById('regPass').value;
-        const r = document.getElementById('regRole').value;
-        try { 
-            const cred = await createUserWithEmailAndPassword(auth, e, p);
-            await setDoc(doc(db, "users", cred.user.uid), { email: e, role: r });
-        } catch(err) { alert(err.message); }
-    };
-
-    window.handleLogout = () => signOut(auth).then(() => window.location.reload());
+    function showNotification(text, icon = "🔔") {
+        const toast = document.getElementById('notification-toast');
+        document.getElementById('notif-text').innerText = text;
+        document.getElementById('notif-icon').innerText = icon;
+        toast.style.display = 'flex';
+        setTimeout(() => toast.style.display = 'none', 4000);
+    }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -282,11 +289,6 @@
             document.getElementById('parentSchedBtn').classList.remove('hidden');
             document.getElementById('kidResetBtn').classList.remove('hidden');
             document.getElementById('clearHistoryBtn').classList.remove('hidden');
-            document.getElementById('balanceLabel').innerText = "UNPAID EARNINGS";
-        } else {
-            document.getElementById('kidResetBtn').classList.add('hidden');
-            document.getElementById('clearHistoryBtn').classList.add('hidden');
-            document.getElementById('balanceLabel').innerText = "AVAILABLE BALANCE";
         }
     }
 
@@ -295,61 +297,56 @@
             document.getElementById('balanceDisplay').innerText = `$${(s.exists() ? s.data().amount : 0).toFixed(2)}`;
         });
 
+        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(1)), (snap) => {
+            if (!snap.empty) {
+                const docData = snap.docs[0];
+                if (lastHistoryId && lastHistoryId !== docData.id) {
+                    showNotification(`Task Finished: ${docData.data().name}`, "✅");
+                }
+                lastHistoryId = docData.id;
+            }
+        });
+
         onSnapshot(collection(db, "chores"), (snap) => {
             const activeList = document.getElementById('choreList');
             const upcomingList = document.getElementById('upcomingList');
             activeList.innerHTML = ''; upcomingList.innerHTML = '';
             
-            const now = new Date();
-            const todayStr = now.toISOString().split('T')[0];
+            const todayStr = new Date().toISOString().split('T')[0];
+            let activeTaskNames = [];
+            snap.forEach(d => { if(d.data().status === 'active') activeTaskNames.push(d.data().name); });
 
             snap.forEach(d => {
                 const c = d.data();
                 const id = d.id;
-                const isTodayOrPast = c.date <= todayStr;
+                const isToday = c.date <= todayStr;
 
-                const itemHtml = `
-                    <div class="chore-item">
-                        <div style="flex: 1; padding-right: 10px;">
-                            <span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date} ${c.repeat !== 'none' ? ' (Repeating)' : ''}</span>
-                            <b style="font-size: 0.85rem;">${c.name}</b>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="color:#6366f1; font-weight:800; font-size:0.9rem;">$${c.price.toFixed(2)}</span>
-                            ${getActionButton(id, c, isTodayOrPast)}
-                        </div>
-                    </div>`;
-
-                if (isTodayOrPast && c.status === 'active') {
-                    activeList.innerHTML += itemHtml;
-                } else if (c.status === 'scheduled') {
-                    upcomingList.innerHTML += itemHtml;
+                if (c.status === 'active') {
+                    activeList.innerHTML += `<div class="chore-item"><div><b>${c.name}</b><br><span style="font-size:0.6rem;color:#6366f1;">$${c.price.toFixed(2)}</span></div>${currentRole === 'kid' ? `<button class="btn-action btn-finish" onclick="finishChore('${id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : `<button onclick="deleteChore('${id}')" style="background:none;border:none;color:red;font-size:1.2rem;">✕</button>`}</div>`;
+                } else {
+                    const alreadyActive = activeTaskNames.includes(c.name);
+                    const btn = (isToday && !alreadyActive) ? `<button class="btn-action btn-start" onclick="activateChore('${id}')">Accept</button>` : `<button class="btn-action btn-locked" disabled>${alreadyActive ? 'Active' : 'Locked'}</button>`;
+                    upcomingList.innerHTML += `<div class="chore-item"><div><span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date}</span><b>${c.name}</b></div>${currentRole === 'kid' ? btn : `<button onclick="deleteChore('${id}')" style="background:none;border:none;color:red;">✕</button>`}</div>`;
                 }
             });
-            if (!activeList.innerHTML) activeList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px;">No active tasks.</p>';
-            if (!upcomingList.innerHTML) upcomingList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px;">No scheduled tasks.</p>';
+        });
+
+        onSnapshot(query(collection(db, "payouts"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
+            const pList = document.getElementById('payoutList');
+            pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
+            snap.forEach(d => {
+                const p = d.data();
+                pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${p.amount.toFixed(2)}</b></div>`;
+            });
         });
 
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
-            const hList = document.getElementById('historyList');
-            hList.innerHTML = snap.empty ? '<p style="color:#94a3b8; text-align:center; font-size:0.8rem;">No recent activity.</p>' : '';
+            const hList = document.getElementById('historyList'); hList.innerHTML = '';
             snap.forEach(d => {
                 const h = d.data();
-                hList.innerHTML += `<div class="chore-item" style="opacity:0.6; font-size:0.75rem; padding: 10px 15px;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
+                hList.innerHTML += `<div class="chore-item" style="opacity:0.6;font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
             });
         });
-    }
-
-    function getActionButton(id, c, isTodayOrPast) {
-        if (currentRole === 'parent') return `<button onclick="deleteChore('${id}')" style="background:none; border:none; color:#ec4899; font-weight:bold; font-size: 1.2rem; cursor:pointer;">✕</button>`;
-        if (c.status === 'scheduled') {
-            return isTodayOrPast 
-                ? `<button class="btn-action btn-start" onclick="activateChore('${id}')">Accept</button>`
-                : `<button class="btn-action btn-locked" disabled>Locked</button>`;
-        }
-        return !c.startTime 
-            ? `<button class="btn-action btn-start" onclick="startChore('${id}')">Start</button>`
-            : `<button id="btn-${id}" class="btn-action btn-finish" onclick="finishChore('${id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>`;
     }
 
     window.createChore = async () => {
@@ -357,51 +354,58 @@
         const p = parseFloat(document.getElementById('taskPrice').value);
         const d = document.getElementById('taskDate').value;
         const r = document.getElementById('taskRepeat').value;
-        if(n && p && d) {
-            await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled', startTime: null });
-            alert("Task Scheduled!");
-            document.getElementById('taskName').value = '';
-            document.getElementById('taskPrice').value = '';
-        }
+        await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled' });
+        showNotification("Task Scheduled!", "📝");
+        document.getElementById('taskName').value = ''; document.getElementById('taskPrice').value = '';
     };
 
     window.activateChore = async (id) => { await updateDoc(doc(db, "chores", id), { status: 'active' }); };
-    window.startChore = async (id) => { await updateDoc(doc(db, "chores", id), { startTime: serverTimestamp() }); };
 
     window.finishChore = async (id, name, price, repeat) => {
-        if (isProcessing) return;
-        isProcessing = true;
-        try {
-            await runTransaction(db, async (transaction) => {
-                const choreRef = doc(db, "chores", id);
-                const balanceRef = doc(db, "appData", "sharedBalance");
-                const bSnap = await transaction.get(balanceRef);
-                const currentBalance = bSnap.exists() ? bSnap.data().amount : 0;
-                transaction.update(balanceRef, { amount: currentBalance + price });
-                transaction.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
-                if (repeat === 'none') {
-                    transaction.delete(choreRef);
-                } else {
-                    let nextDate = new Date();
-                    if (repeat === 'daily') nextDate.setDate(nextDate.getDate() + 1);
-                    if (repeat === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
-                    transaction.update(choreRef, { status: 'scheduled', startTime: null, date: nextDate.toISOString().split('T')[0] });
-                }
-            });
-        } catch (e) { console.error(e); } finally { isProcessing = false; }
+        await runTransaction(db, async (transaction) => {
+            const balanceRef = doc(db, "appData", "sharedBalance");
+            const bSnap = await transaction.get(balanceRef);
+            const currentBalance = bSnap.exists() ? bSnap.data().amount : 0;
+            transaction.update(balanceRef, { amount: currentBalance + price });
+            transaction.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
+            if (repeat === 'none') { transaction.delete(doc(db, "chores", id)); } else {
+                let next = new Date();
+                if (repeat === 'daily') next.setDate(next.getDate() + 1);
+                if (repeat === 'weekly') next.setDate(next.getDate() + 7);
+                transaction.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
+            }
+        });
     };
 
-    window.deleteChore = async (id) => { if(confirm("Delete this task?")) await deleteDoc(doc(db, "chores", id)); };
-    window.resetBalance = async () => { if(confirm("Reset all earnings?")) await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 }); };
-
-    window.clearActivity = async () => {
-        if(confirm("Permanently clear all recent activity?")) {
-            const q = query(collection(db, "history"));
-            const snap = await getDocs(q);
-            const batch = writeBatch(db);
-            snap.forEach(d => batch.delete(d.ref));
-            await batch.commit();
+    window.resetBalance = async () => {
+        const docSnap = await getDoc(doc(db, "appData", "sharedBalance"));
+        const amt = docSnap.data().amount;
+        if(amt > 0 && confirm(`Pay out $${amt.toFixed(2)}?`)) {
+            await addDoc(collection(db, "payouts"), { amount: amt, timestamp: serverTimestamp() });
+            await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 });
+            showNotification("Payment Reset!", "💰");
         }
+    };
+
+    window.handleLogin = async () => {
+        try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } 
+        catch(err) { alert(err.message); }
+    };
+
+    window.handleSignup = async () => {
+        try { 
+            const cred = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value);
+            await setDoc(doc(db, "users", cred.user.uid), { email: cred.user.email, role: document.getElementById('regRole').value });
+        } catch(err) { alert(err.message); }
+    };
+
+    window.handleLogout = () => signOut(auth).then(() => window.location.reload());
+    window.deleteChore = async (id) => { if(confirm("Delete task?")) await deleteDoc(doc(db, "chores", id)); };
+    window.clearActivity = async () => {
+        const snap = await getDocs(collection(db, "history"));
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
     };
 </script>
 </body>
