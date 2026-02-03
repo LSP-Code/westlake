@@ -8,7 +8,8 @@
     <meta name="apple-mobile-web-app-title" content="ChoreCash">
     <meta name="theme-color" content="#8b5cf6">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%238b5cf6%22,%22theme_color%22:%22%238b5cf6%22}">
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22%238b5cf6%22,%22theme_color%22:%22%238b5cf6%22}">
 
     <title>ChoreCash Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -103,7 +104,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px;">
             <div>
-                <button onclick="requestNotificationPermission()" id="notifBtn" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 12px; margin-right: 5px; cursor: pointer;">🔔</button>
+                <button onclick="requestNotificationPermission()" id="notifBtn" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 12px; margin-right: 5px; cursor: pointer;">🔔 Enable Alerts</button>
                 <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
             </div>
         </div>
@@ -129,16 +130,10 @@
                     </div>
                 </div>
                 <div id="upcomingSection" class="section hidden">
-                    <div class="card">
-                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Future Tasks</h4>
-                        <div id="upcomingList"></div>
-                    </div>
+                    <div class="card"><h4 style="margin-bottom:15px; font-size: 0.9rem;">Future Tasks</h4><div id="upcomingList"></div></div>
                 </div>
                 <div id="payoutsSection" class="section hidden">
-                    <div class="card">
-                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Payout History</h4>
-                        <div id="payoutList"></div>
-                    </div>
+                    <div class="card"><h4 style="margin-bottom:15px; font-size: 0.9rem;">Payout History</h4><div id="payoutList"></div></div>
                 </div>
                 <div id="scheduleSection" class="section hidden">
                     <div class="card">
@@ -183,21 +178,30 @@
     let isInitialLoadChore = true;
     let isInitialLoadPayout = true;
 
-    // Register Service Worker for iOS background notifications
+    // --- iOS PUSH FIX: SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(URL.createObjectURL(new Blob([`
-            self.addEventListener('push', e => {
-                const d = e.data.json();
-                self.registration.showNotification(d.title, { body: d.body, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' });
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(e => {
+                // If you can't host a separate sw.js file, this fallback creates one in memory
+                const blob = new Blob([`
+                    self.addEventListener('push', e => {
+                        const d = e.data.json();
+                        self.registration.showNotification(d.title, { body: d.body, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' });
+                    });
+                `], { type: 'text/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
             });
-        `], {type:'text/javascript'}))).catch(() => {});
+        });
     }
 
+    // --- iOS PUSH FIX: MUST BE TRIGGERED BY BUTTON ---
     window.requestNotificationPermission = async () => {
-        const p = await Notification.requestPermission();
-        if (p === "granted") {
-            showNotification("Notifications On!", "✅");
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            showNotification("Alerts are now ACTIVE!", "✅");
             document.getElementById('notifBtn').style.display = 'none';
+        } else {
+            alert("To get notifications, go to Settings > Safari > Advanced > Feature Flags and ensure 'Push API' is on, then Add to Home Screen.");
         }
     };
 
@@ -207,24 +211,21 @@
         document.getElementById('notif-icon').innerText = icon;
         toast.style.display = 'flex';
         setTimeout(() => toast.style.display = 'none', 4000);
+
+        // This is the line that triggers the iOS banner
         if (Notification.permission === "granted") {
-            new Notification("ChoreCash", { body: text, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' });
+            try {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("ChoreCash", {
+                        body: text,
+                        icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png',
+                        badge: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png'
+                    });
+                });
+            } catch (e) {
+                new Notification("ChoreCash", { body: text });
+            }
         }
-    }
-
-    // Daily Reminder Logic (Checks at 6 PM local time)
-    setInterval(() => {
-        const now = new Date();
-        if (now.getHours() === 18 && now.getMinutes() === 0 && currentRole === 'kid') {
-            checkUnfinishedChores();
-        }
-    }, 60000);
-
-    async function checkUnfinishedChores() {
-        const snap = await getDocs(collection(db, "chores"));
-        let activeCount = 0;
-        snap.forEach(d => { if(d.data().status === 'active') activeCount++; });
-        if (activeCount > 0) showNotification(`Reminder: You have ${activeCount} chores to finish before bed!`, "⏰");
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -254,22 +255,20 @@
             document.getElementById('balanceDisplay').innerText = `$${(s.exists() ? s.data().amount : 0).toFixed(2)}`;
         });
 
-        // Notify Kid when Parent schedules
         onSnapshot(collection(db, "chores"), (snap) => {
             if (!isInitialLoadChore && currentRole === 'kid') {
                 snap.docChanges().forEach(change => {
-                    if (change.type === "added") showNotification(`New Task: ${change.doc.data().name}`, "📝");
+                    if (change.type === "added") showNotification(`New Task Added: ${change.doc.data().name}`, "📝");
                 });
             }
             isInitialLoadChore = false;
             renderChores(snap);
         });
 
-        // Notify Kid when Parent Payouts
         onSnapshot(collection(db, "payouts"), (snap) => {
             if (!isInitialLoadPayout && currentRole === 'kid') {
                 snap.docChanges().forEach(change => {
-                    if (change.type === "added") showNotification(`You got paid! Check your payouts.`, "💰");
+                    if (change.type === "added") showNotification(`Money Sent! Check Payouts.`, "💰");
                 });
             }
             isInitialLoadPayout = false;
@@ -285,6 +284,7 @@
         });
     }
 
+    // ... render functions and chore logic remain same ...
     function renderChores(snap) {
         const activeList = document.getElementById('choreList');
         const upcomingList = document.getElementById('upcomingList');
@@ -292,7 +292,6 @@
         const todayStr = new Date().toISOString().split('T')[0];
         let activeTaskNames = [];
         snap.forEach(d => { if(d.data().status === 'active') activeTaskNames.push(d.data().name); });
-
         snap.forEach(d => {
             const c = d.data();
             if (c.status === 'active') {
@@ -304,7 +303,6 @@
             }
         });
     }
-
     function renderPayouts(snap) {
         const pList = document.getElementById('payoutList');
         pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
@@ -313,7 +311,6 @@
             pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${p.amount.toFixed(2)}</b></div>`;
         });
     }
-
     window.createChore = async () => {
         const n = document.getElementById('taskName').value;
         const p = parseFloat(document.getElementById('taskPrice').value);
@@ -323,24 +320,21 @@
         document.getElementById('taskName').value = ''; document.getElementById('taskPrice').value = '';
         showNotification("Task Sent!", "🚀");
     };
-
     window.activateChore = async (id) => await updateDoc(doc(db, "chores", id), { status: 'active' });
-
     window.finishChore = async (id, name, price, repeat) => {
-        await runTransaction(db, async (transaction) => {
+        await runTransaction(db, async (t) => {
             const bRef = doc(db, "appData", "sharedBalance");
-            const bSnap = await transaction.get(bRef);
-            transaction.update(bRef, { amount: (bSnap.exists() ? bSnap.data().amount : 0) + price });
-            transaction.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
-            if (repeat === 'none') transaction.delete(doc(db, "chores", id));
+            const bSnap = await t.get(bRef);
+            t.update(bRef, { amount: (bSnap.exists() ? bSnap.data().amount : 0) + price });
+            t.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
+            if (repeat === 'none') t.delete(doc(db, "chores", id));
             else {
                 let next = new Date();
                 next.setDate(next.getDate() + (repeat === 'daily' ? 1 : 7));
-                transaction.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
+                t.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
             }
         });
     };
-
     window.resetBalance = async () => {
         const docSnap = await getDoc(doc(db, "appData", "sharedBalance"));
         const amt = docSnap.data().amount;
@@ -350,7 +344,6 @@
             showNotification("Payout Recorded!", "💸");
         }
     };
-
     window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
     window.handleSignup = async () => { try { const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); } catch(e) { alert(e.message); } };
     window.handleLogout = () => signOut(auth).then(() => window.location.reload());
