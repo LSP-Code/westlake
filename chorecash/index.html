@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ChoreCash">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#8b5cf6">
     
     <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
     
@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-grad: linear-gradient(165deg, #6366f1 0%, #a855f7 45%, #ec4899 100%);
+            --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --accent: #8b5cf6;
             --bg: #f8fafc;
             --card-bg: #ffffff;
@@ -33,9 +33,9 @@
             overflow-x: hidden;
         }
 
-        /* LAYOUT SYSTEM */
+        /* FLEXIBLE LAYOUT SYSTEM */
         .app-shell {
-            display: none; 
+            display: none; /* Shown after auth */
             width: 100%;
             height: 100vh;
             display: grid;
@@ -43,7 +43,7 @@
             grid-template-columns: 260px 1fr 340px;
         }
 
-        /* NAVIGATION (Sidebar Desktop / Bottom Bar Mobile) */
+        /* 1. NAVIGATION */
         .nav-panel {
             grid-area: nav;
             background: var(--card-bg);
@@ -66,7 +66,7 @@
         .nav-item:hover { background: #f1f5f9; color: var(--accent); }
         .nav-item.active { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3); }
 
-        /* MAIN CONTENT */
+        /* 2. MAIN CONTENT AREA */
         .main-panel {
             grid-area: main;
             padding: 40px;
@@ -76,7 +76,7 @@
             width: 100%;
         }
 
-        /* SIDE PANEL (Desktop Balance) */
+        /* 3. SIDE PANEL */
         .side-panel {
             grid-area: side;
             background: var(--card-bg);
@@ -87,17 +87,9 @@
             gap: 25px;
         }
 
-        /* UI CARDS */
+        /* CARDS & UI */
         .card { background: white; border-radius: 24px; padding: 25px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 20px; }
-        
-        .balance-card { 
-            background: var(--primary-grad); 
-            color: white; 
-            border-radius: 24px; 
-            padding: 30px; 
-            text-align: center;
-            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
-        }
+        .balance-card { background: var(--primary-grad); color: white; border-radius: 24px; padding: 30px; text-align: center; }
         .balance-card h3 { font-size: 0.75rem; opacity: 0.9; letter-spacing: 1px; }
         .balance-card .amount { font-size: 3rem; font-weight: 800; margin: 10px 0; }
 
@@ -107,7 +99,7 @@
             margin-bottom: 12px; border: 1px solid #f1f5f9;
         }
 
-        /* RESPONSIVE BREAKPOINTS */
+        /* BREAKPOINT: TABLET (1100px) */
         @media (max-width: 1100px) {
             .app-shell { grid-template-columns: 80px 1fr 300px; }
             .nav-text { display: none; }
@@ -115,16 +107,20 @@
             .nav-item { padding: 15px; justify-content: center; }
         }
 
+        /* BREAKPOINT: MOBILE (850px) */
         @media (max-width: 850px) {
             body { background: white; }
-            .app-shell { display: block; height: auto; }
+            .app-shell {
+                display: block;
+                height: auto;
+            }
             .nav-panel {
                 position: fixed; bottom: 0; left: 0; width: 100%; height: 75px;
                 flex-direction: row; padding: 0 10px; border-right: none; border-top: 1px solid #e2e8f0;
                 justify-content: space-around; align-items: center;
                 background: white;
             }
-            .nav-logo { display: none; }
+            .nav-logo, .nav-links br { display: none; }
             .nav-links { flex-direction: row; width: 100%; justify-content: space-around; }
             .nav-item { flex-direction: column; gap: 4px; padding: 10px; font-size: 0.6rem; }
             .nav-item span:first-child { font-size: 1.2rem; }
@@ -135,18 +131,9 @@
             .desktop-only { display: none; }
         }
 
-        /* AUTH SCREEN */
-        #authScreen { 
-            position: fixed; inset: 0; 
-            background: var(--primary-grad); 
-            z-index: 10000; 
-            display: flex; align-items: center; justify-content: center; padding: 20px; 
-        }
-        .auth-card { 
-            background: white; width: 100%; max-width: 400px; 
-            border-radius: 30px; padding: 40px; text-align: center; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
-        }
+        /* Auth styling */
+        #authScreen { position: fixed; inset: 0; background: var(--primary-grad); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: white; width: 100%; max-width: 400px; border-radius: 30px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         
         .input-field { width: 100%; padding: 14px 20px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; margin-bottom: 12px; font-family: inherit; outline: none; }
         .btn-main { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary-grad); color: white; font-weight: 700; cursor: pointer; }
@@ -157,7 +144,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.1.1</div>
+    <div class="version-tag">v1.1.4</div>
 
     <div id="authScreen">
         <div class="auth-card">
@@ -189,7 +176,6 @@
     </div>
 
     <div id="appScreen" class="app-shell">
-        
         <nav class="nav-panel">
             <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" class="nav-logo">
             <div class="nav-links">
@@ -248,7 +234,7 @@
             <div class="balance-card">
                 <h3>AVAILABLE CASH</h3>
                 <div class="amount balanceDisplay">$0.00</div>
-                <button onclick="resetBalance()" style="width:100%; padding:12px; border-radius:12px; border:none; background:white; color:var(--accent); font-weight:700; margin-top:15px; cursor:pointer;">PAY & RESET</button>
+                <button onclick="resetBalance()" style="width:100%; padding:10px; border-radius:12px; border:none; background:white; color:var(--accent); font-weight:700; margin-top:15px; cursor:pointer;">PAY & RESET</button>
             </div>
             
             <div class="card">
@@ -256,7 +242,6 @@
                 <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
             </div>
         </aside>
-
     </div>
 
 <script type="module">
@@ -343,7 +328,8 @@
         const p = parseFloat(document.getElementById('taskPrice').value);
         const d = document.getElementById('taskDate').value;
         const r = document.getElementById('taskRepeat').value;
-        await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled' });
+        // Setting status to 'active' so it appears on the board immediately as per original template logic
+        await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'active' });
         document.getElementById('taskName').value = ''; 
         document.getElementById('taskPrice').value = '';
     };
@@ -376,7 +362,7 @@
         document.getElementById(t + 'Section').classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         event.currentTarget.classList.add('active');
-        document.getElementById('pageTitle').innerText = t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById('pageTitle').innerText = t === 'active' ? 'Chore Board' : t.charAt(0).toUpperCase() + t.slice(1);
     };
 
     window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
