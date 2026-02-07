@@ -70,7 +70,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.0.2</div>
+    <div class="version-tag">v1.0.3</div>
 
     <div id="notification-toast">
         <span id="notif-icon">🔔</span>
@@ -210,7 +210,7 @@
             showNotification("Alerts are now ACTIVE!", "✅");
             document.getElementById('notifBtn').style.display = 'none';
         } else {
-            alert("To enable alerts on iPhone: 1. Use 'Add to Home Screen' 2. Open that app. 3. Try this button again.");
+            alert("Enable alerts on iPhone: 1. Add to Home Screen. 2. Open Home Screen app. 3. Try again.");
         }
     };
 
@@ -235,12 +235,16 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (user.email === DEV_EMAIL) currentRole = 'parent';
-            else currentRole = userDoc.exists() ? userDoc.data().role : 'kid';
-            
-            setupDashboard(currentRole);
-            loadData();
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (user.email === DEV_EMAIL) currentRole = 'parent';
+                else currentRole = userDoc.exists() ? userDoc.data().role : 'kid';
+                
+                setupDashboard(currentRole);
+                loadData();
+            } catch (e) {
+                alert("Database Access Error: " + e.message + ". Check your Firestore Rules!");
+            }
         } else {
             document.getElementById('authScreen').style.display = 'flex';
             document.getElementById('appScreen').style.display = 'none';
@@ -258,7 +262,7 @@
         onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
             const val = s.exists() ? s.data().amount : 0;
             document.getElementById('balanceDisplay').innerText = `$${Number(val).toFixed(2)}`;
-        });
+        }, (err) => console.error("Balance Load Error", err));
 
         onSnapshot(collection(db, "chores"), (snap) => {
             if (!isInitialLoadChore && currentRole === 'kid') {
@@ -268,7 +272,7 @@
             }
             isInitialLoadChore = false;
             renderChores(snap);
-        });
+        }, (err) => console.error("Chores Load Error", err));
 
         onSnapshot(collection(db, "payouts"), (snap) => {
             if (!isInitialLoadPayout && currentRole === 'kid') {
@@ -278,7 +282,7 @@
             }
             isInitialLoadPayout = false;
             renderPayouts(snap);
-        });
+        }, (err) => console.error("Payouts Load Error", err));
 
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
@@ -286,7 +290,7 @@
                 const h = d.data();
                 hList.innerHTML += `<div class="chore-item" style="opacity:0.6;font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${Number(h.price).toFixed(2)}</span></div>`;
             });
-        });
+        }, (err) => console.error("History Load Error", err));
     }
 
     function renderChores(snap) {
