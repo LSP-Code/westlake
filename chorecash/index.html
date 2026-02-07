@@ -10,211 +10,253 @@
     
     <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
     
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22%236366f1%22,%22theme_color%22:%22%236366f1%22}">
-
     <title>ChoreCash Elite</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Updated to match the vibrant multi-color gradient in your screenshot */
-            --primary-grad: linear-gradient(165deg, #6366f1 0%, #a855f7 40%, #ec4899 100%);
-            --button-grad: linear-gradient(90deg, #6366f1 0%, #ec4899 100%);
-        }
-        
-        html, body { 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden;
-            background: #6366f1;
+            --primary-grad: linear-gradient(165deg, #6366f1 0%, #a855f7 45%, #ec4899 100%);
+            --accent: #8b5cf6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
         }
 
-        /* Fixed background ensures color goes behind the notch and home bar */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--primary-grad);
-            z-index: -1;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
+            min-height: 100vh; 
             font-family: 'Poppins', sans-serif; 
-            display: flex; 
+            background: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* LAYOUT SYSTEM */
+        .app-shell {
+            display: none; 
+            width: 100%;
+            height: 100vh;
+            display: grid;
+            grid-template-areas: "nav main side";
+            grid-template-columns: 260px 1fr 340px;
+        }
+
+        /* NAVIGATION (Sidebar Desktop / Bottom Bar Mobile) */
+        .nav-panel {
+            grid-area: nav;
+            background: var(--card-bg);
+            border-right: 1px solid #e2e8f0;
+            display: flex;
             flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
-            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px; 
+            padding: 30px 20px;
+            z-index: 100;
         }
+
+        .nav-logo { width: 45px; margin-bottom: 40px; border-radius: 12px; }
+        .nav-links { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
         
-        #notification-toast {
-            position: fixed; top: env(safe-area-inset-top); left: 50%; transform: translateX(-50%);
-            background: white; padding: 15px 25px; border-radius: 50px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
-            display: none; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;
-            animation: slideDown 0.3s ease-out;
+        .nav-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 20px; border-radius: 14px;
+            color: var(--text-dim); font-weight: 600; text-decoration: none;
+            cursor: pointer; transition: 0.2s;
         }
-        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: env(safe-area-inset-top); opacity: 1; } }
+        .nav-item:hover { background: #f1f5f9; color: var(--accent); }
+        .nav-item.active { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3); }
 
-        .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.6rem; color: rgba(255,255,255,0.4); font-weight: 600; pointer-events: none; z-index: 9999; }
-
-        .auth-container { 
-            width: 100%; 
-            max-width: 380px; 
-            background: white; 
-            border-radius: 45px; 
-            padding: 50px 30px;
-            text-align: center; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        /* MAIN CONTENT */
+        .main-panel {
+            grid-area: main;
+            padding: 40px;
+            overflow-y: auto;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-        .logo-display { width: 65px; height: 65px; margin-bottom: 25px; border-radius: 16px; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .auth-container h1 { font-size: 2rem; font-weight: 700; color: #1e1b4b; margin-bottom: 35px; }
-
-        .input-group { position: relative; margin-bottom: 15px; width: 100%; }
-        .input-field { 
-            width: 100%; 
-            padding: 20px 25px; 
-            border-radius: 22px; 
-            border: 1px solid #f1f5f9; 
-            background: #f8fafc; 
-            outline: none; 
-            font-family: inherit; 
-            font-size: 1rem; 
-            display: block; 
-            -webkit-appearance: none; 
-            transition: border-color 0.3s;
+        /* SIDE PANEL (Desktop Balance) */
+        .side-panel {
+            grid-area: side;
+            background: var(--card-bg);
+            border-left: 1px solid #e2e8f0;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
-        .input-field:focus { border-color: #a855f7; }
 
-        .btn-main { 
-            width: 100%; 
-            padding: 20px; 
-            border-radius: 22px; 
-            border: none; 
-            background: var(--button-grad); 
+        /* UI CARDS */
+        .card { background: white; border-radius: 24px; padding: 25px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 20px; }
+        
+        .balance-card { 
+            background: var(--primary-grad); 
             color: white; 
-            font-weight: 700; 
-            cursor: pointer; 
-            font-size: 1.1rem; 
-            margin-top: 15px;
-            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3);
-            transition: transform 0.2s;
+            border-radius: 24px; 
+            padding: 30px; 
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
         }
-        .btn-main:active { transform: scale(0.98); }
+        .balance-card h3 { font-size: 0.75rem; opacity: 0.9; letter-spacing: 1px; }
+        .balance-card .amount { font-size: 3rem; font-weight: 800; margin: 10px 0; }
 
-        /* Dashboard View */
-        .dashboard { width: 100%; max-width: 500px; display: none; padding-top: 10px; }
-        .balance-card { background: white; border-radius: 35px; padding: 35px; text-align: center; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
-        .amount { font-size: 3.5rem; font-weight: 800; color: #4f46e5; margin: 10px 0; }
-        
-        .card { background: white; border-radius: 28px; padding: 25px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
-        
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding: 5px; -webkit-overflow-scrolling: touch; }
-        .tab { flex: 1; padding: 14px 15px; border-radius: 18px; border: none; background: rgba(255,255,255,0.25); color: white; font-weight: 700; font-size: 0.8rem; white-space: nowrap; transition: 0.3s; }
-        .tab.active { background: white; color: #6366f1; transform: translateY(-2px); }
+        .chore-row { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 16px; background: #f8fafc; border-radius: 18px; 
+            margin-bottom: 12px; border: 1px solid #f1f5f9;
+        }
 
-        .chore-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: #f8fafc; border-radius: 20px; margin-bottom: 12px; border: 1px solid #f1f5f9; }
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1100px) {
+            .app-shell { grid-template-columns: 80px 1fr 300px; }
+            .nav-text { display: none; }
+            .nav-panel { padding: 30px 10px; align-items: center; }
+            .nav-item { padding: 15px; justify-content: center; }
+        }
+
+        @media (max-width: 850px) {
+            body { background: white; }
+            .app-shell { display: block; height: auto; }
+            .nav-panel {
+                position: fixed; bottom: 0; left: 0; width: 100%; height: 75px;
+                flex-direction: row; padding: 0 10px; border-right: none; border-top: 1px solid #e2e8f0;
+                justify-content: space-around; align-items: center;
+                background: white;
+            }
+            .nav-logo { display: none; }
+            .nav-links { flex-direction: row; width: 100%; justify-content: space-around; }
+            .nav-item { flex-direction: column; gap: 4px; padding: 10px; font-size: 0.6rem; }
+            .nav-item span:first-child { font-size: 1.2rem; }
+            
+            .side-panel { display: none; } 
+            .main-panel { padding: 20px; padding-top: 60px; padding-bottom: 100px; }
+            .mobile-balance { display: block !important; margin-bottom: 25px; }
+            .desktop-only { display: none; }
+        }
+
+        /* AUTH SCREEN */
+        #authScreen { 
+            position: fixed; inset: 0; 
+            background: var(--primary-grad); 
+            z-index: 10000; 
+            display: flex; align-items: center; justify-content: center; padding: 20px; 
+        }
+        .auth-card { 
+            background: white; width: 100%; max-width: 400px; 
+            border-radius: 30px; padding: 40px; text-align: center; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+        }
+        
+        .input-field { width: 100%; padding: 14px 20px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; margin-bottom: 12px; font-family: inherit; outline: none; }
+        .btn-main { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary-grad); color: white; font-weight: 700; cursor: pointer; }
+        
+        .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.6rem; color: #cbd5e1; z-index: 9999; pointer-events: none; }
         .hidden { display: none !important; }
-        .link-text { color: #8b5cf6; font-weight: 700; cursor: pointer; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.0.7</div>
+    <div class="version-tag">v1.1.1</div>
 
-    <div id="notification-toast">
-        <span id="notif-icon">🔔</span>
-        <span id="notif-text">Notification</span>
-    </div>
-
-    <div id="authScreen" class="auth-container">
-        <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" class="logo-display">
-        <div id="loginView">
-            <h1>Welcome</h1>
-            <form onsubmit="event.preventDefault(); handleLogin();">
-                <div class="input-group"><input type="email" id="loginEmail" class="input-field" placeholder="Email" required></div>
-                <div class="input-group"><input type="password" id="loginPass" class="input-field" placeholder="Password" required></div>
-                <button type="submit" class="btn-main">Login</button>
-            </form>
-            <p style="margin-top:30px; font-size:0.95rem; color: #64748b;">No account? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
-        </div>
-        <div id="signupView" class="hidden">
-            <h1>Create Account</h1>
-            <form onsubmit="event.preventDefault(); handleSignup();">
-                <div class="input-group"><input type="email" id="regEmail" class="input-field" placeholder="Email" required></div>
-                <div class="input-group"><input type="password" id="regPass" class="input-field" placeholder="Password" required></div>
-                <div class="input-group">
+    <div id="authScreen">
+        <div class="auth-card">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:60px; margin-bottom:20px; border-radius:12px;">
+            <div id="loginView">
+                <h3>Welcome Back</h3>
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 20px;">Sign in to your ChoreCash account</p>
+                <form onsubmit="event.preventDefault(); handleLogin();">
+                    <input type="email" id="loginEmail" class="input-field" placeholder="Email" required>
+                    <input type="password" id="loginPass" class="input-field" placeholder="Password" required>
+                    <button type="submit" class="btn-main">Login</button>
+                </form>
+                <p style="margin-top:20px; font-size:0.8rem;">No account? <span style="color:var(--accent); cursor:pointer;" onclick="toggleAuth()">Sign Up</span></p>
+            </div>
+            <div id="signupView" class="hidden">
+                <h3>Create Account</h3>
+                <form onsubmit="event.preventDefault(); handleSignup();">
+                    <input type="email" id="regEmail" class="input-field" placeholder="Email" required>
+                    <input type="password" id="regPass" class="input-field" placeholder="Password" required>
                     <select id="regRole" class="input-field">
                         <option value="kid">Account Type: Kid</option>
                         <option value="parent">Account Type: Parent</option>
                     </select>
-                </div>
-                <button type="submit" class="btn-main">Sign Up</button>
-            </form>
-            <p style="margin-top:30px; font-size:0.95rem; color: #64748b;">Already have an account? <span class="link-text" onclick="toggleAuth()">Login</span></p>
+                    <button type="submit" class="btn-main">Sign Up</button>
+                </form>
+                <p style="margin-top:20px; font-size:0.8rem;">Have an account? <span style="color:var(--accent); cursor:pointer;" onclick="toggleAuth()">Login</span></p>
+            </div>
         </div>
     </div>
 
-    <div id="appScreen" class="dashboard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; padding: 0 10px;">
-            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:45px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-            <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.25); border: none; padding: 12px 20px; border-radius: 18px; font-weight: 700; font-size: 0.85rem;">Logout</button>
-        </div>
+    <div id="appScreen" class="app-shell">
+        
+        <nav class="nav-panel">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" class="nav-logo">
+            <div class="nav-links">
+                <div class="nav-item active" onclick="switchTab('active')"><span>📋</span><span class="nav-text">Board</span></div>
+                <div class="nav-item" onclick="switchTab('upcoming')"><span>⏳</span><span class="nav-text">Upcoming</span></div>
+                <div class="nav-item" onclick="switchTab('payouts')"><span>💸</span><span class="nav-text">Payouts</span></div>
+                <div class="nav-item hidden" id="parentSchedBtn" onclick="switchTab('schedule')"><span>⚙️</span><span class="nav-text">Manage</span></div>
+            </div>
+            <div class="nav-item desktop-only" onclick="handleLogout()" style="margin-top:auto"><span>🚪</span><span class="nav-text">Logout</span></div>
+        </nav>
 
-        <div class="tab-bar">
-            <button class="tab active" onclick="switchTab('active')">BOARD</button>
-            <button class="tab" onclick="switchTab('upcoming')">UPCOMING</button>
-            <button class="tab" onclick="switchTab('payouts')">PAYOUTS</button>
-            <button class="tab hidden" id="parentSchedBtn" onclick="switchTab('schedule')">SCHEDULE</button>
-        </div>
+        <main class="main-panel">
+            <div class="mobile-balance hidden">
+                <div class="balance-card">
+                    <h3>BALANCE</h3>
+                    <div class="amount balanceDisplay">$0.00</div>
+                </div>
+            </div>
 
-        <div class="balance-card">
-            <h3 style="font-size:0.75rem; color: #94a3b8; letter-spacing: 1.5px; font-weight: 700;">CURRENT BALANCE</h3>
-            <div id="balanceDisplay" class="amount">$0.00</div>
-            <button id="resetBtn" onclick="resetBalance()" class="btn-main" style="font-size:0.85rem; padding:14px; margin-top:10px;">PAY & RESET</button>
-        </div>
+            <header style="margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
+                <h1 id="pageTitle" style="font-weight: 800;">Chore Board</h1>
+                <div id="userBadge" style="font-size:0.7rem; font-weight:700; background:#e2e8f0; padding:5px 12px; border-radius:20px;">KID MODE</div>
+            </header>
 
-        <div id="activeSection" class="section">
-            <div class="card">
-                <h4 style="margin-bottom:18px; font-size: 1rem; color: #1e1b4b; font-weight: 700;">Active Tasks</h4>
+            <div id="activeSection" class="section">
                 <div id="choreList"></div>
             </div>
-        </div>
 
-        <div id="upcomingSection" class="section hidden">
-            <div class="card"><h4 style="margin-bottom:18px; font-size: 1rem; font-weight: 700;">Upcoming</h4><div id="upcomingList"></div></div>
-        </div>
-
-        <div id="payoutsSection" class="section hidden">
-            <div class="card"><h4 style="margin-bottom:18px; font-size: 1rem; font-weight: 700;">Payouts</h4><div id="payoutList"></div></div>
-        </div>
-
-        <div id="scheduleSection" class="section hidden">
-            <div class="card">
-                <h4 style="margin-bottom:18px; font-size: 1rem; font-weight: 700;">Schedule Task</h4>
-                <form onsubmit="event.preventDefault(); createChore();">
-                    <input type="text" id="taskName" class="input-field" placeholder="Task Name" required style="margin-bottom:12px;">
-                    <input type="number" id="taskPrice" class="input-field" placeholder="Value ($)" step="0.01" required style="margin-bottom:12px;">
-                    <input type="date" id="taskDate" class="input-field" required style="margin-bottom:12px;">
-                    <select id="taskRepeat" class="input-field" style="margin-bottom:18px;">
-                        <option value="none">One Time</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                    </select>
-                    <button type="submit" class="btn-main">Create Task</button>
-                </form>
+            <div id="upcomingSection" class="section hidden">
+                <div id="upcomingList"></div>
             </div>
-        </div>
 
-        <div class="card">
-            <h4 style="font-size: 0.8rem; margin-bottom: 15px; color: #94a3b8; letter-spacing: 1px; font-weight: 700;">RECENT HISTORY</h4>
-            <div id="historyList"></div>
-        </div>
+            <div id="payoutsSection" class="section hidden">
+                <div id="payoutList"></div>
+            </div>
+
+            <div id="scheduleSection" class="section hidden">
+                <div class="card">
+                    <h3 style="margin-bottom:15px">Schedule Task</h3>
+                    <form onsubmit="event.preventDefault(); createChore();">
+                        <input type="text" id="taskName" class="input-field" placeholder="Task Name" required>
+                        <input type="number" id="taskPrice" class="input-field" placeholder="Value ($)" step="0.01" required>
+                        <input type="date" id="taskDate" class="input-field" required>
+                        <select id="taskRepeat" class="input-field">
+                            <option value="none">One Time</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                        <button type="submit" class="btn-main">Add to Board</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <aside class="side-panel">
+            <div class="balance-card">
+                <h3>AVAILABLE CASH</h3>
+                <div class="amount balanceDisplay">$0.00</div>
+                <button onclick="resetBalance()" style="width:100%; padding:12px; border-radius:12px; border:none; background:white; color:var(--accent); font-weight:700; margin-top:15px; cursor:pointer;">PAY & RESET</button>
+            </div>
+            
+            <div class="card">
+                <h4 style="font-size:0.8rem; color:var(--text-dim); margin-bottom:15px">RECENT ACTIVITY</h4>
+                <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+        </aside>
+
     </div>
 
 <script type="module">
@@ -237,72 +279,62 @@
 
     enableIndexedDbPersistence(db).catch(() => {});
 
+    let currentRole = 'kid';
     const DEV_EMAIL = "loganwestlake933@gmail.com";
-    let currentRole = null;
-
-    function showNotification(text, icon = "🔔") {
-        const toast = document.getElementById('notification-toast');
-        document.getElementById('notif-text').innerText = text;
-        document.getElementById('notif-icon').innerText = icon;
-        toast.style.display = 'flex';
-        setTimeout(() => toast.style.display = 'none', 4000);
-    }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            setTimeout(async () => {
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    currentRole = (user.email === DEV_EMAIL) ? 'parent' : (userDoc.exists() ? userDoc.data().role : 'kid');
-                    setupDashboard(currentRole);
-                    loadData();
-                } catch (e) { alert("Database error: " + e.message); }
-            }, 600);
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            currentRole = (user.email === DEV_EMAIL) ? 'parent' : (userDoc.exists() ? userDoc.data().role : 'kid');
+            
+            document.getElementById('userBadge').innerText = currentRole.toUpperCase() + ' MODE';
+            if (currentRole === 'parent') document.getElementById('parentSchedBtn').classList.remove('hidden');
+            
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = (window.innerWidth > 850) ? 'grid' : 'block';
+            loadData();
         } else {
-            document.getElementById('authScreen').style.display = 'block';
+            document.getElementById('authScreen').style.display = 'flex';
             document.getElementById('appScreen').style.display = 'none';
         }
     });
 
-    function setupDashboard(role) {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('appScreen').style.display = 'block';
-        if (role === 'parent') document.getElementById('parentSchedBtn').classList.remove('hidden');
-    }
-
     function loadData() {
-        onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
+        onSnapshot(doc(db, "appData", "sharedBalance"), s => {
             const val = s.exists() ? s.data().amount : 0;
-            document.getElementById('balanceDisplay').innerText = `$${Number(val).toFixed(2)}`;
+            document.querySelectorAll('.balanceDisplay').forEach(el => el.innerText = `$${Number(val).toFixed(2)}`);
         });
 
-        onSnapshot(collection(db, "chores"), (snap) => {
+        onSnapshot(collection(db, "chores"), snap => {
             const activeList = document.getElementById('choreList');
             const upcomingList = document.getElementById('upcomingList');
             activeList.innerHTML = ''; upcomingList.innerHTML = '';
-            const today = new Date().toISOString().split('T')[0];
             
             snap.forEach(d => {
                 const c = d.data();
-                const itemHtml = `<div class="chore-item"><div><b>${c.name}</b><br><small>$${Number(c.price).toFixed(2)}</small></div>`;
-                if (c.status === 'active') {
-                    activeList.innerHTML += itemHtml + (currentRole === 'kid' ? `<button onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')" style="background:#10b981; color:white; border:none; padding:10px 18px; border-radius:14px; font-weight:700;">Finish</button></div>` : '</div>');
-                } else {
-                    const isReady = c.date <= today;
-                    upcomingList.innerHTML += `<div class="chore-item"><div><small style="color:#6366f1;font-weight:700;">${c.date}</small><br><b>${c.name}</b></div>${currentRole === 'kid' ? `<button onclick="activateChore('${d.id}')" ${!isReady ? 'disabled' : ''} style="background:${isReady ? '#6366f1':'#cbd5e1'}; color:white; border:none; padding:10px 18px; border-radius:14px; font-weight:700;">Accept</button></div>` : '</div>'}`;
-                }
+                const html = `
+                    <div class="chore-row">
+                        <div>
+                            <p style="font-weight:700">${c.name}</p>
+                            <p style="font-size:0.75rem; color:var(--text-dim)">$${Number(c.price).toFixed(2)} • ${c.repeat}</p>
+                        </div>
+                        ${c.status === 'active' ? 
+                            `<button class="btn-main" style="width:auto; padding:8px 15px; font-size:0.8rem;" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : 
+                            `<span style="font-size:0.7rem; font-weight:700; color:var(--accent)">${c.date}</span>`
+                        }
+                    </div>`;
+                if(c.status === 'active') activeList.innerHTML += html;
+                else upcomingList.innerHTML += html;
             });
+            if(!activeList.innerHTML) activeList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.9rem; margin-top:20px;">All chores done! 🎉</p>';
         });
 
-        onSnapshot(collection(db, "payouts"), (snap) => {
-            const pList = document.getElementById('payoutList');
-            pList.innerHTML = '';
-            snap.forEach(d => { pList.innerHTML += `<div class="chore-item"><span>Payout Sent</span><b style="color:#10b981;">+$${Number(d.data().amount).toFixed(2)}</b></div>`; });
-        });
-
-        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(5)), (snap) => {
+        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(5)), snap => {
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
-            snap.forEach(d => { hList.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:10px; color:#64748b; background:#f8fafc; padding:10px 15px; border-radius:12px;"><span>${d.data().name}</span><b>$${Number(d.data().price).toFixed(2)}</b></div>`; });
+            snap.forEach(d => {
+                const h = d.data();
+                hList.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.8rem"><span>✅ ${h.name}</span><b>$${Number(h.price).toFixed(2)}</b></div>`;
+            });
         });
     }
 
@@ -312,18 +344,15 @@
         const d = document.getElementById('taskDate').value;
         const r = document.getElementById('taskRepeat').value;
         await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled' });
-        showNotification("Task Scheduled!");
-        switchTab('active');
+        document.getElementById('taskName').value = ''; 
+        document.getElementById('taskPrice').value = '';
     };
-
-    window.activateChore = async (id) => await updateDoc(doc(db, "chores", id), { status: 'active' });
 
     window.finishChore = async (id, name, price, repeat) => {
         await runTransaction(db, async (t) => {
             const bRef = doc(db, "appData", "sharedBalance");
             const bSnap = await t.get(bRef);
-            const currentAmt = bSnap.exists() ? bSnap.data().amount : 0;
-            t.update(bRef, { amount: currentAmt + price });
+            t.update(bRef, { amount: (bSnap.exists() ? bSnap.data().amount : 0) + price });
             t.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
             if (repeat === 'none') t.delete(doc(db, "chores", id));
             else {
@@ -331,29 +360,29 @@
                 t.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
             }
         });
-        showNotification("Well done!", "⭐");
     };
 
     window.resetBalance = async () => {
-        const docSnap = await getDoc(doc(db, "appData", "sharedBalance"));
-        const amt = docSnap.exists() ? docSnap.data().amount : 0;
-        if(amt > 0 && confirm(`Pay out $${amt.toFixed(2)}?`)) {
+        const s = await getDoc(doc(db, "appData", "sharedBalance"));
+        const amt = s.exists() ? s.data().amount : 0;
+        if(amt > 0 && confirm(`Confirm payout of $${amt.toFixed(2)}?`)) {
             await addDoc(collection(db, "payouts"), { amount: amt, timestamp: serverTimestamp() });
             await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 });
         }
     };
 
-    window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
-    window.handleSignup = async () => { try { const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); } catch(e) { alert(e.message); } };
-    window.handleLogout = () => signOut(auth).then(() => window.location.reload());
-    window.toggleAuth = () => { document.getElementById('loginView').classList.toggle('hidden'); document.getElementById('signupView').classList.toggle('hidden'); };
     window.switchTab = (t) => {
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'Section').classList.remove('hidden');
-        const targetBtn = [...document.querySelectorAll('.tab')].find(b => b.innerText.toLowerCase().includes(t.toLowerCase()) || (t === 'active' && b.innerText === 'BOARD'));
-        if (targetBtn) targetBtn.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.getElementById('pageTitle').innerText = t.charAt(0).toUpperCase() + t.slice(1);
     };
+
+    window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
+    window.handleSignup = async () => { try { const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); } catch(e) { alert(e.message); } };
+    window.handleLogout = () => signOut(auth).then(() => location.reload());
+    window.toggleAuth = () => { document.getElementById('loginView').classList.toggle('hidden'); document.getElementById('signupView').classList.toggle('hidden'); };
 </script>
 </body>
 </html>
