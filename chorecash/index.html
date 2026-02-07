@@ -132,7 +132,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.1.5</div>
+    <div class="version-tag">v1.1.8</div>
 
     <div id="authScreen">
         <div class="auth-card">
@@ -351,7 +351,6 @@
         document.getElementById(t + 'Section').classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         
-        // Find the correct nav item to highlight
         const items = document.querySelectorAll('.nav-item');
         items.forEach(item => {
             if(item.getAttribute('onclick') && item.getAttribute('onclick').includes(t)) {
