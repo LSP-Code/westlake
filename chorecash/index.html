@@ -33,9 +33,17 @@
             overflow-x: hidden;
         }
 
-        /* FLEXIBLE LAYOUT SYSTEM */
+        /* MOBILE HEADER (Always visible on mobile) */
+        .mobile-header {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: white; border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px; padding-top: env(safe-area-inset-top);
+            z-index: 1000; justify-content: space-between; align-items: center;
+        }
+
         .app-shell {
-            display: none; /* Shown after auth */
+            display: none;
             width: 100%;
             height: 100vh;
             display: grid;
@@ -43,7 +51,7 @@
             grid-template-columns: 260px 1fr 340px;
         }
 
-        /* 1. NAVIGATION (Sidebar on Desktop, Bottom Bar on Mobile) */
+        /* NAVIGATION */
         .nav-panel {
             grid-area: nav;
             background: var(--card-bg);
@@ -60,13 +68,12 @@
         .nav-item {
             display: flex; align-items: center; gap: 15px;
             padding: 14px 20px; border-radius: 14px;
-            color: var(--text-dim); font-weight: 600; text-decoration: none;
-            cursor: pointer; transition: 0.2s;
+            color: var(--text-dim); font-weight: 600; cursor: pointer; transition: 0.2s;
         }
         .nav-item:hover { background: #f1f5f9; color: var(--accent); }
         .nav-item.active { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3); }
 
-        /* 2. MAIN CONTENT AREA */
+        /* MAIN CONTENT AREA */
         .main-panel {
             grid-area: main;
             padding: 40px;
@@ -76,18 +83,16 @@
             width: 100%;
         }
 
-        /* 3. SIDE PANEL (Stats on Desktop, Hidden/Modal on Mobile) */
+        /* SIDE PANEL */
         .side-panel {
             grid-area: side;
             background: var(--card-bg);
             border-left: 1px solid #e2e8f0;
             padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
+            display: flex; flex-direction: column; gap: 25px;
         }
 
-        /* CARDS & UI */
+        /* CARDS */
         .card { background: white; border-radius: 24px; padding: 25px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .balance-card { background: var(--primary-grad); color: white; border-radius: 24px; padding: 30px; text-align: center; }
         .balance-card h3 { font-size: 0.75rem; opacity: 0.9; letter-spacing: 1px; }
@@ -99,7 +104,9 @@
             margin-bottom: 12px; border: 1px solid #f1f5f9;
         }
 
-        /* BREAKPOINT: TABLET (1100px) */
+        .btn-logout-small { background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.7rem; cursor: pointer; }
+
+        /* TABLET ADJUSTMENTS */
         @media (max-width: 1100px) {
             .app-shell { grid-template-columns: 80px 1fr 300px; }
             .nav-text { display: none; }
@@ -107,51 +114,53 @@
             .nav-item { padding: 15px; justify-content: center; }
         }
 
-        /* BREAKPOINT: MOBILE (850px) */
+        /* MOBILE ADJUSTMENTS */
         @media (max-width: 850px) {
             body { background: white; }
-            .app-shell {
-                display: block;
-                height: auto;
-            }
+            .mobile-header { display: flex; }
+            .app-shell { display: block; height: auto; padding-top: 80px; }
             .nav-panel {
                 position: fixed; bottom: 0; left: 0; width: 100%; height: 75px;
                 flex-direction: row; padding: 0 10px; border-right: none; border-top: 1px solid #e2e8f0;
                 justify-content: space-around; align-items: center;
             }
-            .nav-logo, .nav-links br { display: none; }
+            .nav-logo, .desktop-logout { display: none; }
             .nav-links { flex-direction: row; width: 100%; justify-content: space-around; }
             .nav-item { flex-direction: column; gap: 4px; padding: 10px; font-size: 0.6rem; }
             .nav-item span:first-child { font-size: 1.2rem; }
             
-            .side-panel { display: none; } /* On mobile, we show balance inside the main panel */
-            .main-panel { padding: 20px; padding-top: 60px; padding-bottom: 100px; }
-            .mobile-balance { display: block !important; margin-bottom: 25px; }
-            .desktop-only { display: none; }
+            .side-panel { display: none; }
+            .main-panel { padding: 20px; padding-bottom: 100px; }
         }
 
-        /* Auth styling (stays centered) */
         #authScreen { position: fixed; inset: 0; background: var(--primary-grad); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .auth-card { background: white; width: 100%; max-width: 400px; border-radius: 30px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         
         .input-field { width: 100%; padding: 14px 20px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; margin-bottom: 12px; font-family: inherit; outline: none; }
         .btn-main { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary-grad); color: white; font-weight: 700; cursor: pointer; }
         
-        .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.6rem; color: #cbd5e1; z-index: 9999; pointer-events: none; }
+        .version-tag { position: fixed; bottom: 85px; right: 15px; font-size: 0.6rem; color: #cbd5e1; z-index: 9999; pointer-events: none; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v1.0.7</div>
+    <div class="version-tag">v1.0.8</div>
+
+    <div class="mobile-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:30px; border-radius:6px;">
+            <b style="font-size:0.9rem; color:var(--accent);">$<span class="balanceDisplay">0.00</span></b>
+        </div>
+        <button class="btn-logout-small" onclick="handleLogout()">LOGOUT</button>
+    </div>
 
     <div id="authScreen">
         <div class="auth-card">
             <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:60px; margin-bottom:20px; border-radius:12px;">
             <div id="loginView">
-                <h3>Welcome Back</h3>
-                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 20px;">Sign in to your ChoreCash account</p>
-                <form onsubmit="event.preventDefault(); handleLogin();">
+                <h3>Welcome</h3>
+                <form onsubmit="event.preventDefault(); handleLogin();" style="margin-top:20px;">
                     <input type="email" id="loginEmail" class="input-field" placeholder="Email" required>
                     <input type="password" id="loginPass" class="input-field" placeholder="Password" required>
                     <button type="submit" class="btn-main">Login</button>
@@ -160,12 +169,12 @@
             </div>
             <div id="signupView" class="hidden">
                 <h3>Create Account</h3>
-                <form onsubmit="event.preventDefault(); handleSignup();">
+                <form onsubmit="event.preventDefault(); handleSignup();" style="margin-top:20px;">
                     <input type="email" id="regEmail" class="input-field" placeholder="Email" required>
                     <input type="password" id="regPass" class="input-field" placeholder="Password" required>
                     <select id="regRole" class="input-field">
-                        <option value="kid">Account Type: Kid</option>
-                        <option value="parent">Account Type: Parent</option>
+                        <option value="kid">Kid</option>
+                        <option value="parent">Parent</option>
                     </select>
                     <button type="submit" class="btn-main">Sign Up</button>
                 </form>
@@ -184,20 +193,13 @@
                 <div class="nav-item" onclick="switchTab('payouts')"><span>💸</span><span class="nav-text">Payouts</span></div>
                 <div class="nav-item hidden" id="parentSchedBtn" onclick="switchTab('schedule')"><span>⚙️</span><span class="nav-text">Manage</span></div>
             </div>
-            <div class="nav-item desktop-only" onclick="handleLogout()" style="margin-top:auto"><span>🚪</span><span class="nav-text">Logout</span></div>
+            <div class="nav-item desktop-logout" onclick="handleLogout()" style="margin-top:auto"><span>🚪</span><span class="nav-text">Logout</span></div>
         </nav>
 
         <main class="main-panel">
-            <div class="mobile-balance hidden">
-                <div class="balance-card">
-                    <h3>BALANCE</h3>
-                    <div class="amount balanceDisplay">$0.00</div>
-                </div>
-            </div>
-
             <header style="margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
                 <h1 id="pageTitle" style="font-weight: 800;">Chore Board</h1>
-                <div id="userBadge" style="font-size:0.7rem; font-weight:700; background:#e2e8f0; padding:5px 12px; border-radius:20px;">KID MODE</div>
+                <div id="userBadge" style="font-size:0.6rem; font-weight:800; background:#e2e8f0; padding:4px 10px; border-radius:20px; text-transform:uppercase;">Loading...</div>
             </header>
 
             <div id="activeSection" class="section">
@@ -232,13 +234,13 @@
 
         <aside class="side-panel">
             <div class="balance-card">
-                <h3>AVAILABLE CASH</h3>
+                <h3>EARNINGS</h3>
                 <div class="amount balanceDisplay">$0.00</div>
                 <button onclick="resetBalance()" style="width:100%; padding:10px; border-radius:12px; border:none; background:white; color:var(--accent); font-weight:700; margin-top:15px; cursor:pointer;">PAY & RESET</button>
             </div>
             
             <div class="card">
-                <h4 style="font-size:0.8rem; color:var(--text-dim); margin-bottom:15px">RECENT ACTIVITY</h4>
+                <h4 style="font-size:0.75rem; color:var(--text-dim); margin-bottom:15px; letter-spacing:1px;">RECENT LOG</h4>
                 <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
             </div>
         </aside>
@@ -273,7 +275,7 @@
             const userDoc = await getDoc(doc(db, "users", user.uid));
             currentRole = (user.email === DEV_EMAIL) ? 'parent' : (userDoc.exists() ? userDoc.data().role : 'kid');
             
-            document.getElementById('userBadge').innerText = currentRole.toUpperCase() + ' MODE';
+            document.getElementById('userBadge').innerText = currentRole;
             if (currentRole === 'parent') document.getElementById('parentSchedBtn').classList.remove('hidden');
             
             document.getElementById('authScreen').style.display = 'none';
@@ -288,7 +290,7 @@
     function loadData() {
         onSnapshot(doc(db, "appData", "sharedBalance"), s => {
             const val = s.exists() ? s.data().amount : 0;
-            document.querySelectorAll('.balanceDisplay').forEach(el => el.innerText = `$${Number(val).toFixed(2)}`);
+            document.querySelectorAll('.balanceDisplay').forEach(el => el.innerText = Number(val).toFixed(2));
         });
 
         onSnapshot(collection(db, "chores"), snap => {
@@ -301,25 +303,25 @@
                 const html = `
                     <div class="chore-row">
                         <div>
-                            <p style="font-weight:700">${c.name}</p>
-                            <p style="font-size:0.75rem; color:var(--text-dim)">$${Number(c.price).toFixed(2)} • ${c.repeat}</p>
+                            <p style="font-weight:700; font-size:0.9rem;">${c.name}</p>
+                            <p style="font-size:0.7rem; color:var(--text-dim)">$${Number(c.price).toFixed(2)}</p>
                         </div>
                         ${c.status === 'active' ? 
-                            `<button class="btn-main" style="width:auto; padding:8px 15px; font-size:0.8rem;" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : 
-                            `<span style="font-size:0.7rem; font-weight:700; color:var(--accent)">${c.date}</span>`
+                            `<button class="btn-main" style="width:auto; padding:8px 15px; font-size:0.75rem;" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Done</button>` : 
+                            `<span style="font-size:0.65rem; font-weight:700; color:var(--accent); background:#f1f0ff; padding:4px 8px; border-radius:6px;">${c.date}</span>`
                         }
                     </div>`;
                 if(c.status === 'active') activeList.innerHTML += html;
                 else upcomingList.innerHTML += html;
             });
-            if(!activeList.innerHTML) activeList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.9rem; margin-top:20px;">All chores done! 🎉</p>';
+            if(!activeList.innerHTML) activeList.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin-top:20px;">No chores today! 🏖️</p>';
         });
 
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(5)), snap => {
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
             snap.forEach(d => {
                 const h = d.data();
-                hList.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.8rem"><span>✅ ${h.name}</span><b>$${Number(h.price).toFixed(2)}</b></div>`;
+                hList.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.75rem"><span>${h.name}</span><b>$${Number(h.price).toFixed(2)}</b></div>`;
             });
         });
     }
@@ -361,7 +363,8 @@
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.getElementById(t + 'Section').classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        const activeNav = [...document.querySelectorAll('.nav-item')].find(n => n.innerText.toLowerCase().includes(t.toLowerCase()) || (t === 'active' && n.innerText.toLowerCase().includes('board')));
+        if (activeNav) activeNav.classList.add('active');
         document.getElementById('pageTitle').innerText = t.charAt(0).toUpperCase() + t.slice(1);
     };
 
