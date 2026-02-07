@@ -70,7 +70,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.0.3</div>
+    <div class="version-tag">v1.0.4</div>
 
     <div id="notification-toast">
         <span id="notif-icon">🔔</span>
@@ -186,18 +186,11 @@
     let isInitialLoadChore = true;
     let isInitialLoadPayout = true;
 
+    // Service Worker setup...
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
-                const swCode = `
-                    self.addEventListener('push', e => {
-                        const d = e.data ? e.data.json() : { title: 'ChoreCash', body: 'New Update!' };
-                        self.registration.showNotification(d.title, { 
-                            body: d.body, 
-                            icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' 
-                        });
-                    });
-                `;
+                const swCode = `self.addEventListener('push', e => { const d = e.data ? e.data.json() : { title: 'ChoreCash', body: 'New Update!' }; self.registration.showNotification(d.title, { body: d.body, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' }); });`;
                 const blob = new Blob([swCode], { type: 'text/javascript' });
                 await navigator.serviceWorker.register(URL.createObjectURL(blob));
             } catch (e) { console.error("SW failed", e); }
@@ -210,7 +203,7 @@
             showNotification("Alerts are now ACTIVE!", "✅");
             document.getElementById('notifBtn').style.display = 'none';
         } else {
-            alert("Enable alerts on iPhone: 1. Add to Home Screen. 2. Open Home Screen app. 3. Try again.");
+            alert("To enable: 1. Add to Home Screen. 2. Open Home app. 3. Try again.");
         }
     };
 
@@ -220,31 +213,23 @@
         document.getElementById('notif-icon').innerText = icon;
         toast.style.display = 'flex';
         setTimeout(() => toast.style.display = 'none', 4000);
-
-        if (Notification.permission === "granted") {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification("ChoreCash", {
-                    body: text,
-                    icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png'
-                });
-            }).catch(() => {
-                new Notification("ChoreCash", { body: text });
-            });
-        }
     }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            try {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (user.email === DEV_EMAIL) currentRole = 'parent';
-                else currentRole = userDoc.exists() ? userDoc.data().role : 'kid';
-                
-                setupDashboard(currentRole);
-                loadData();
-            } catch (e) {
-                alert("Database Access Error: " + e.message + ". Check your Firestore Rules!");
-            }
+            // Give Firebase a moment to settle auth context on mobile
+            setTimeout(async () => {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (user.email === DEV_EMAIL) currentRole = 'parent';
+                    else currentRole = userDoc.exists() ? userDoc.data().role : 'kid';
+                    
+                    setupDashboard(currentRole);
+                    loadData();
+                } catch (e) {
+                    alert("Database Error: " + e.message + "\n\nTip: Ensure Firestore Rules are set to: allow read, write: if request.auth != null;");
+                }
+            }, 500); 
         } else {
             document.getElementById('authScreen').style.display = 'flex';
             document.getElementById('appScreen').style.display = 'none';
@@ -255,34 +240,29 @@
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('appScreen').style.display = 'block';
         if (role === 'parent') document.getElementById('parentSchedBtn').classList.remove('hidden');
-        if (Notification.permission === "granted") document.getElementById('notifBtn').style.display = 'none';
     }
 
     function loadData() {
         onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
             const val = s.exists() ? s.data().amount : 0;
             document.getElementById('balanceDisplay').innerText = `$${Number(val).toFixed(2)}`;
-        }, (err) => console.error("Balance Load Error", err));
+        });
 
         onSnapshot(collection(db, "chores"), (snap) => {
             if (!isInitialLoadChore && currentRole === 'kid') {
-                snap.docChanges().forEach(change => {
-                    if (change.type === "added") showNotification(`New Task: ${change.doc.data().name}`, "📝");
-                });
+                snap.docChanges().forEach(change => { if (change.type === "added") showNotification(`New Task: ${change.doc.data().name}`, "📝"); });
             }
             isInitialLoadChore = false;
             renderChores(snap);
-        }, (err) => console.error("Chores Load Error", err));
+        });
 
         onSnapshot(collection(db, "payouts"), (snap) => {
             if (!isInitialLoadPayout && currentRole === 'kid') {
-                snap.docChanges().forEach(change => {
-                    if (change.type === "added") showNotification(`Money Sent!`, "💰");
-                });
+                snap.docChanges().forEach(change => { if (change.type === "added") showNotification(`Money Sent!`, "💰"); });
             }
             isInitialLoadPayout = false;
             renderPayouts(snap);
-        }, (err) => console.error("Payouts Load Error", err));
+        });
 
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
@@ -290,7 +270,7 @@
                 const h = d.data();
                 hList.innerHTML += `<div class="chore-item" style="opacity:0.6;font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${Number(h.price).toFixed(2)}</span></div>`;
             });
-        }, (err) => console.error("History Load Error", err));
+        });
     }
 
     function renderChores(snap) {
@@ -299,7 +279,6 @@
         activeList.innerHTML = ''; upcomingList.innerHTML = '';
         const todayStr = new Date().toISOString().split('T')[0];
         let activeTaskNames = [];
-        
         snap.forEach(d => { if(d.data().status === 'active') activeTaskNames.push(d.data().name); });
         
         snap.forEach(d => {
@@ -307,12 +286,8 @@
             if (c.status === 'active') {
                 activeList.innerHTML += `<div class="chore-item"><div><b>${c.name}</b><br><span style="font-size:0.6rem;color:#6366f1;">$${Number(c.price).toFixed(2)}</span></div>${currentRole === 'kid' ? `<button class="btn-action btn-finish" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : ''}</div>`;
             } else {
-                const alreadyActive = activeTaskNames.includes(c.name);
-                const isReady = c.date <= todayStr && !alreadyActive;
-                const btnClass = isReady ? 'btn-start' : 'btn-locked';
-                const btnText = alreadyActive ? 'Active' : (isReady ? 'Accept' : 'Locked');
-                
-                upcomingList.innerHTML += `<div class="chore-item"><div><span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date}</span><b>${c.name}</b></div>${currentRole === 'kid' ? `<button class="btn-action ${btnClass}" ${!isReady ? 'disabled' : ''} onclick="activateChore('${d.id}')">${btnText}</button>` : ''}</div>`;
+                const isReady = c.date <= todayStr && !activeTaskNames.includes(c.name);
+                upcomingList.innerHTML += `<div class="chore-item"><div><span class="schedule-tag">${c.date}</span><b>${c.name}</b></div>${currentRole === 'kid' ? `<button class="btn-action ${isReady ? 'btn-start' : 'btn-locked'}" ${!isReady ? 'disabled' : ''} onclick="activateChore('${d.id}')">${isReady ? 'Accept' : 'Locked'}</button>` : ''}</div>`;
             }
         });
     }
@@ -321,8 +296,7 @@
         const pList = document.getElementById('payoutList');
         pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
         snap.forEach(d => {
-            const p = d.data();
-            pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${Number(p.amount).toFixed(2)}</b></div>`;
+            pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${Number(d.data().amount).toFixed(2)}</b></div>`;
         });
     }
 
@@ -344,15 +318,11 @@
             const bRef = doc(db, "appData", "sharedBalance");
             const bSnap = await t.get(bRef);
             const currentAmt = bSnap.exists() ? bSnap.data().amount : 0;
-            
             t.update(bRef, { amount: currentAmt + price });
             t.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
-            
-            if (repeat === 'none') {
-                t.delete(doc(db, "chores", id));
-            } else {
-                let next = new Date();
-                next.setDate(next.getDate() + (repeat === 'daily' ? 1 : 7));
+            if (repeat === 'none') t.delete(doc(db, "chores", id));
+            else {
+                let next = new Date(); next.setDate(next.getDate() + (repeat === 'daily' ? 1 : 7));
                 t.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
             }
         });
@@ -364,30 +334,13 @@
         if(amt > 0 && confirm(`Pay out $${amt.toFixed(2)}?`)) {
             await addDoc(collection(db, "payouts"), { amount: amt, timestamp: serverTimestamp() });
             await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 });
-            showNotification("Payout Recorded!", "💸");
         }
     };
 
-    window.handleLogin = async () => { 
-        try { 
-            await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); 
-        } catch(e) { alert("Login Error: " + e.message); } 
-    };
-
-    window.handleSignup = async () => { 
-        try { 
-            const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); 
-            await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); 
-        } catch(e) { alert("Signup Error: " + e.message); } 
-    };
-
+    window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
+    window.handleSignup = async () => { try { const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); } catch(e) { alert(e.message); } };
     window.handleLogout = () => signOut(auth).then(() => window.location.reload());
-    
-    window.toggleAuth = () => { 
-        document.getElementById('loginView').classList.toggle('hidden'); 
-        document.getElementById('signupView').classList.toggle('hidden'); 
-    };
-
+    window.toggleAuth = () => { document.getElementById('loginView').classList.toggle('hidden'); document.getElementById('signupView').classList.toggle('hidden'); };
     window.switchTab = (t) => {
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
