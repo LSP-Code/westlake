@@ -158,7 +158,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCinpQHRf32negN8ORvt7Ohl6VF9wjVys4",
@@ -173,35 +173,42 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // FIX: Enable Offline Persistence (Better for iPhone sync)
+    enableIndexedDbPersistence(db).catch((err) => {
+        console.warn("Persistence failed", err.code);
+    });
+
     const DEV_EMAIL = "loganwestlake933@gmail.com";
     let currentRole = null;
     let isInitialLoadChore = true;
     let isInitialLoadPayout = true;
 
-    // --- iOS PUSH FIX: SERVICE WORKER ---
+    // FIX: Robust Service Worker registration for Push
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').catch(e => {
-                // If you can't host a separate sw.js file, this fallback creates one in memory
-                const blob = new Blob([`
+        window.addEventListener('load', async () => {
+            try {
+                const swCode = `
                     self.addEventListener('push', e => {
-                        const d = e.data.json();
-                        self.registration.showNotification(d.title, { body: d.body, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' });
+                        const d = e.data ? e.data.json() : { title: 'ChoreCash', body: 'New Update!' };
+                        self.registration.showNotification(d.title, { 
+                            body: d.body, 
+                            icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' 
+                        });
                     });
-                `], { type: 'text/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob));
-            });
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                await navigator.serviceWorker.register(URL.createObjectURL(blob));
+            } catch (e) { console.error("SW failed", e); }
         });
     }
 
-    // --- iOS PUSH FIX: MUST BE TRIGGERED BY BUTTON ---
     window.requestNotificationPermission = async () => {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
             showNotification("Alerts are now ACTIVE!", "✅");
             document.getElementById('notifBtn').style.display = 'none';
         } else {
-            alert("To get notifications, go to Settings > Safari > Advanced > Feature Flags and ensure 'Push API' is on, then Add to Home Screen.");
+            alert("To enable alerts on iPhone: 1. Use 'Add to Home Screen' 2. Open that app. 3. Try this button again.");
         }
     };
 
@@ -212,30 +219,25 @@
         toast.style.display = 'flex';
         setTimeout(() => toast.style.display = 'none', 4000);
 
-        // This is the line that triggers the iOS banner
         if (Notification.permission === "granted") {
-            try {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification("ChoreCash", {
-                        body: text,
-                        icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png',
-                        badge: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png'
-                    });
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification("ChoreCash", {
+                    body: text,
+                    icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png'
                 });
-            } catch (e) {
+            }).catch(() => {
                 new Notification("ChoreCash", { body: text });
-            }
+            });
         }
     }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            if (user.email === DEV_EMAIL) { currentRole = 'parent'; setupDashboard('parent'); }
-            else { 
-                const d = await getDoc(doc(db, "users", user.uid));
-                currentRole = d.exists() ? d.data().role : 'kid';
-                setupDashboard(currentRole);
-            }
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (user.email === DEV_EMAIL) currentRole = 'parent';
+            else currentRole = userDoc.exists() ? userDoc.data().role : 'kid';
+            
+            setupDashboard(currentRole);
             loadData();
         } else {
             document.getElementById('authScreen').style.display = 'flex';
@@ -251,14 +253,16 @@
     }
 
     function loadData() {
+        // FIX: Ensure balance pulls from correct shared doc
         onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
-            document.getElementById('balanceDisplay').innerText = `$${(s.exists() ? s.data().amount : 0).toFixed(2)}`;
+            const val = s.exists() ? s.data().amount : 0;
+            document.getElementById('balanceDisplay').innerText = `$${Number(val).toFixed(2)}`;
         });
 
         onSnapshot(collection(db, "chores"), (snap) => {
             if (!isInitialLoadChore && currentRole === 'kid') {
                 snap.docChanges().forEach(change => {
-                    if (change.type === "added") showNotification(`New Task Added: ${change.doc.data().name}`, "📝");
+                    if (change.type === "added") showNotification(`New Task: ${change.doc.data().name}`, "📝");
                 });
             }
             isInitialLoadChore = false;
@@ -268,7 +272,7 @@
         onSnapshot(collection(db, "payouts"), (snap) => {
             if (!isInitialLoadPayout && currentRole === 'kid') {
                 snap.docChanges().forEach(change => {
-                    if (change.type === "added") showNotification(`Money Sent! Check Payouts.`, "💰");
+                    if (change.type === "added") showNotification(`Money Sent!`, "💰");
                 });
             }
             isInitialLoadPayout = false;
@@ -279,75 +283,106 @@
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
             snap.forEach(d => {
                 const h = d.data();
-                hList.innerHTML += `<div class="chore-item" style="opacity:0.6;font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
+                hList.innerHTML += `<div class="chore-item" style="opacity:0.6;font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${Number(h.price).toFixed(2)}</span></div>`;
             });
         });
     }
 
-    // ... render functions and chore logic remain same ...
     function renderChores(snap) {
         const activeList = document.getElementById('choreList');
         const upcomingList = document.getElementById('upcomingList');
         activeList.innerHTML = ''; upcomingList.innerHTML = '';
         const todayStr = new Date().toISOString().split('T')[0];
         let activeTaskNames = [];
+        
         snap.forEach(d => { if(d.data().status === 'active') activeTaskNames.push(d.data().name); });
+        
         snap.forEach(d => {
             const c = d.data();
             if (c.status === 'active') {
-                activeList.innerHTML += `<div class="chore-item"><div><b>${c.name}</b><br><span style="font-size:0.6rem;color:#6366f1;">$${c.price.toFixed(2)}</span></div>${currentRole === 'kid' ? `<button class="btn-action btn-finish" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : ''}</div>`;
+                activeList.innerHTML += `<div class="chore-item"><div><b>${c.name}</b><br><span style="font-size:0.6rem;color:#6366f1;">$${Number(c.price).toFixed(2)}</span></div>${currentRole === 'kid' ? `<button class="btn-action btn-finish" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : ''}</div>`;
             } else {
                 const alreadyActive = activeTaskNames.includes(c.name);
-                const btn = (c.date <= todayStr && !alreadyActive) ? `<button class="btn-action btn-start" onclick="activateChore('${d.id}')">Accept</button>` : `<button class="btn-action btn-locked" disabled>${alreadyActive ? 'Active' : 'Locked'}</button>`;
-                upcomingList.innerHTML += `<div class="chore-item"><div><span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date}</span><b>${c.name}</b></div>${currentRole === 'kid' ? btn : ''}</div>`;
+                const isReady = c.date <= todayStr && !alreadyActive;
+                const btnClass = isReady ? 'btn-start' : 'btn-locked';
+                const btnText = alreadyActive ? 'Active' : (isReady ? 'Accept' : 'Locked');
+                
+                upcomingList.innerHTML += `<div class="chore-item"><div><span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date}</span><b>${c.name}</b></div>${currentRole === 'kid' ? `<button class="btn-action ${btnClass}" ${!isReady ? 'disabled' : ''} onclick="activateChore('${d.id}')">${btnText}</button>` : ''}</div>`;
             }
         });
     }
+
     function renderPayouts(snap) {
         const pList = document.getElementById('payoutList');
         pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
         snap.forEach(d => {
             const p = d.data();
-            pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${p.amount.toFixed(2)}</b></div>`;
+            pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${Number(p.amount).toFixed(2)}</b></div>`;
         });
     }
+
     window.createChore = async () => {
         const n = document.getElementById('taskName').value;
         const p = parseFloat(document.getElementById('taskPrice').value);
         const d = document.getElementById('taskDate').value;
         const r = document.getElementById('taskRepeat').value;
         await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled' });
-        document.getElementById('taskName').value = ''; document.getElementById('taskPrice').value = '';
+        document.getElementById('taskName').value = ''; 
+        document.getElementById('taskPrice').value = '';
         showNotification("Task Sent!", "🚀");
     };
+
     window.activateChore = async (id) => await updateDoc(doc(db, "chores", id), { status: 'active' });
+
     window.finishChore = async (id, name, price, repeat) => {
         await runTransaction(db, async (t) => {
             const bRef = doc(db, "appData", "sharedBalance");
             const bSnap = await t.get(bRef);
-            t.update(bRef, { amount: (bSnap.exists() ? bSnap.data().amount : 0) + price });
+            const currentAmt = bSnap.exists() ? bSnap.data().amount : 0;
+            
+            t.update(bRef, { amount: currentAmt + price });
             t.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
-            if (repeat === 'none') t.delete(doc(db, "chores", id));
-            else {
+            
+            if (repeat === 'none') {
+                t.delete(doc(db, "chores", id));
+            } else {
                 let next = new Date();
                 next.setDate(next.getDate() + (repeat === 'daily' ? 1 : 7));
                 t.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
             }
         });
     };
+
     window.resetBalance = async () => {
         const docSnap = await getDoc(doc(db, "appData", "sharedBalance"));
-        const amt = docSnap.data().amount;
+        const amt = docSnap.exists() ? docSnap.data().amount : 0;
         if(amt > 0 && confirm(`Pay out $${amt.toFixed(2)}?`)) {
             await addDoc(collection(db, "payouts"), { amount: amt, timestamp: serverTimestamp() });
             await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 });
             showNotification("Payout Recorded!", "💸");
         }
     };
-    window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
-    window.handleSignup = async () => { try { const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); } catch(e) { alert(e.message); } };
+
+    window.handleLogin = async () => { 
+        try { 
+            await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); 
+        } catch(e) { alert("Login Error: " + e.message); } 
+    };
+
+    window.handleSignup = async () => { 
+        try { 
+            const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); 
+            await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); 
+        } catch(e) { alert("Signup Error: " + e.message); } 
+    };
+
     window.handleLogout = () => signOut(auth).then(() => window.location.reload());
-    window.toggleAuth = () => { document.getElementById('loginView').classList.toggle('hidden'); document.getElementById('signupView').classList.toggle('hidden'); };
+    
+    window.toggleAuth = () => { 
+        document.getElementById('loginView').classList.toggle('hidden'); 
+        document.getElementById('signupView').classList.toggle('hidden'); 
+    };
+
     window.switchTab = (t) => {
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
