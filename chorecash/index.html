@@ -7,9 +7,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ChoreCash">
     <meta name="theme-color" content="#8b5cf6">
+    
     <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
     
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22%238b5cf6%22,%22theme_color%22:%22%238b5cf6%22}">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22%238b5cf6%22,%22theme_color%22:%22%238b5cf6%22,%22icons%22:[{%22src%22:%22https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%20maskable%22}]}">
 
     <title>ChoreCash Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +21,7 @@
             --bg-purple: #8b5cf6;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { min-height: 100vh; font-family: 'Poppins', sans-serif; background: var(--bg-purple); display: flex; align-items: center; justify-content: center; padding: 15px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); position: relative; }
+        body { min-height: 100vh; font-family: 'Poppins', sans-serif; background: var(--bg-purple); display: flex; align-items: center; justify-content: center; padding: 15px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); position: relative; overflow-x: hidden; }
         
         #notification-toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
@@ -34,8 +35,8 @@
         .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.6rem; color: rgba(255,255,255,0.5); font-weight: 600; pointer-events: none; z-index: 9999; }
 
         .auth-container { width: 100%; max-width: 1000px; background: white; border-radius: 25px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
-        .auth-left { background: var(--primary-grad); padding: 40px; color: white; flex: 1.2; display: flex; flex-direction: column; justify-content: center; }
-        .logo-display { width: 80px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
+        .auth-left { background: var(--primary-grad); padding: 40px; color: white; flex: 1.2; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        .logo-display { width: 80px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); border-radius: 18px; }
         .auth-left h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
         .auth-right { flex: 1; padding: 40px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .auth-right h2 { font-size: 0.8rem; letter-spacing: 3px; color: #6366f1; margin-bottom: 30px; font-weight: 700; text-transform: uppercase; }
@@ -49,10 +50,10 @@
         .dash-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 900px) { .dash-grid { grid-template-columns: 380px 1fr; } }
 
-        .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; }
+        .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; position: relative; }
         .amount { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
         .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
-        .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; overflow-x: auto; }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tab { flex: 1; padding: 12px 10px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
         .tab.active { background: white; color: var(--bg-purple); }
 
@@ -70,7 +71,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.0.4</div>
+    <div class="version-tag">v1.0.5</div>
 
     <div id="notification-toast">
         <span id="notif-icon">🔔</span>
@@ -106,9 +107,9 @@
 
     <div id="appScreen" class="dashboard">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px;">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px; border-radius: 8px;">
             <div>
-                <button onclick="requestNotificationPermission()" id="notifBtn" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 12px; margin-right: 5px; cursor: pointer;">🔔 Enable Alerts</button>
+                <button onclick="requestNotificationPermission()" id="notifBtn" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 12px; margin-right: 5px; cursor: pointer; color: white;">🔔 Alerts</button>
                 <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
             </div>
         </div>
@@ -122,7 +123,7 @@
 
         <div class="dash-grid">
             <div class="balance-card">
-                <h3 id="balanceLabel" style="font-size:0.65rem; opacity:0.8;">BALANCE</h3>
+                <h3 id="balanceLabel" style="font-size:0.65rem; opacity:0.8;">CURRENT BALANCE</h3>
                 <div id="balanceDisplay" class="amount">$0.00</div>
                 <button id="kidResetBtn" onclick="resetBalance()" class="btn-main" style="background:white; color:#6366f1; font-size:0.75rem; padding:10px; margin-top:10px;">PAY & RESET</button>
             </div>
@@ -177,16 +178,13 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    enableIndexedDbPersistence(db).catch((err) => {
-        console.warn("Persistence failed", err.code);
-    });
+    enableIndexedDbPersistence(db).catch((err) => { console.warn("Persistence failed", err.code); });
 
     const DEV_EMAIL = "loganwestlake933@gmail.com";
     let currentRole = null;
     let isInitialLoadChore = true;
     let isInitialLoadPayout = true;
 
-    // Service Worker setup...
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
@@ -217,19 +215,17 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // Give Firebase a moment to settle auth context on mobile
             setTimeout(async () => {
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (user.email === DEV_EMAIL) currentRole = 'parent';
                     else currentRole = userDoc.exists() ? userDoc.data().role : 'kid';
-                    
                     setupDashboard(currentRole);
                     loadData();
                 } catch (e) {
-                    alert("Database Error: " + e.message + "\n\nTip: Ensure Firestore Rules are set to: allow read, write: if request.auth != null;");
+                    alert("Database Error: " + e.message + "\n\nTip: Check Firestore Rules for auth.");
                 }
-            }, 500); 
+            }, 600); 
         } else {
             document.getElementById('authScreen').style.display = 'flex';
             document.getElementById('appScreen').style.display = 'none';
@@ -247,7 +243,6 @@
             const val = s.exists() ? s.data().amount : 0;
             document.getElementById('balanceDisplay').innerText = `$${Number(val).toFixed(2)}`;
         });
-
         onSnapshot(collection(db, "chores"), (snap) => {
             if (!isInitialLoadChore && currentRole === 'kid') {
                 snap.docChanges().forEach(change => { if (change.type === "added") showNotification(`New Task: ${change.doc.data().name}`, "📝"); });
@@ -255,7 +250,6 @@
             isInitialLoadChore = false;
             renderChores(snap);
         });
-
         onSnapshot(collection(db, "payouts"), (snap) => {
             if (!isInitialLoadPayout && currentRole === 'kid') {
                 snap.docChanges().forEach(change => { if (change.type === "added") showNotification(`Money Sent!`, "💰"); });
@@ -263,7 +257,6 @@
             isInitialLoadPayout = false;
             renderPayouts(snap);
         });
-
         onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
             snap.forEach(d => {
@@ -280,7 +273,6 @@
         const todayStr = new Date().toISOString().split('T')[0];
         let activeTaskNames = [];
         snap.forEach(d => { if(d.data().status === 'active') activeTaskNames.push(d.data().name); });
-        
         snap.forEach(d => {
             const c = d.data();
             if (c.status === 'active') {
@@ -295,9 +287,7 @@
     function renderPayouts(snap) {
         const pList = document.getElementById('payoutList');
         pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
-        snap.forEach(d => {
-            pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${Number(d.data().amount).toFixed(2)}</b></div>`;
-        });
+        snap.forEach(d => { pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${Number(d.data().amount).toFixed(2)}</b></div>`; });
     }
 
     window.createChore = async () => {
@@ -306,8 +296,7 @@
         const d = document.getElementById('taskDate').value;
         const r = document.getElementById('taskRepeat').value;
         await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled' });
-        document.getElementById('taskName').value = ''; 
-        document.getElementById('taskPrice').value = '';
+        document.getElementById('taskName').value = ''; document.getElementById('taskPrice').value = '';
         showNotification("Task Sent!", "🚀");
     };
 
@@ -345,7 +334,8 @@
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'Section').classList.remove('hidden');
-        [...document.querySelectorAll('.tab')].find(b => b.innerText.toLowerCase().includes(t.toLowerCase()) || (t === 'active' && b.innerText === 'BOARD')).classList.add('active');
+        const targetBtn = [...document.querySelectorAll('.tab')].find(b => b.innerText.toLowerCase().includes(t.toLowerCase()) || (t === 'active' && b.innerText === 'BOARD'));
+        if (targetBtn) targetBtn.classList.add('active');
     };
 </script>
 </body>
