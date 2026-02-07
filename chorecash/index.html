@@ -178,9 +178,11 @@
     let isInitialLoadChore = true;
     let isInitialLoadPayout = true;
 
+    // --- iOS PUSH FIX: SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js').catch(e => {
+                // If you can't host a separate sw.js file, this fallback creates one in memory
                 const blob = new Blob([`
                     self.addEventListener('push', e => {
                         const d = e.data.json();
@@ -192,6 +194,7 @@
         });
     }
 
+    // --- iOS PUSH FIX: MUST BE TRIGGERED BY BUTTON ---
     window.requestNotificationPermission = async () => {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
@@ -209,6 +212,7 @@
         toast.style.display = 'flex';
         setTimeout(() => toast.style.display = 'none', 4000);
 
+        // This is the line that triggers the iOS banner
         if (Notification.permission === "granted") {
             try {
                 navigator.serviceWorker.ready.then(registration => {
@@ -280,6 +284,7 @@
         });
     }
 
+    // ... render functions and chore logic remain same ...
     function renderChores(snap) {
         const activeList = document.getElementById('choreList');
         const upcomingList = document.getElementById('upcomingList');
@@ -298,7 +303,6 @@
             }
         });
     }
-
     function renderPayouts(snap) {
         const pList = document.getElementById('payoutList');
         pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
@@ -307,7 +311,6 @@
             pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${p.amount.toFixed(2)}</b></div>`;
         });
     }
-
     window.createChore = async () => {
         const n = document.getElementById('taskName').value;
         const p = parseFloat(document.getElementById('taskPrice').value);
@@ -317,9 +320,7 @@
         document.getElementById('taskName').value = ''; document.getElementById('taskPrice').value = '';
         showNotification("Task Sent!", "🚀");
     };
-
     window.activateChore = async (id) => await updateDoc(doc(db, "chores", id), { status: 'active' });
-
     window.finishChore = async (id, name, price, repeat) => {
         await runTransaction(db, async (t) => {
             const bRef = doc(db, "appData", "sharedBalance");
@@ -334,7 +335,6 @@
             }
         });
     };
-
     window.resetBalance = async () => {
         const docSnap = await getDoc(doc(db, "appData", "sharedBalance"));
         const amt = docSnap.data().amount;
@@ -344,12 +344,10 @@
             showNotification("Payout Recorded!", "💸");
         }
     };
-
     window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } catch(e) { alert(e.message); } };
     window.handleSignup = async () => { try { const c = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value); await setDoc(doc(db, "users", c.user.uid), { email: c.user.email, role: document.getElementById('regRole').value }); } catch(e) { alert(e.message); } };
     window.handleLogout = () => signOut(auth).then(() => window.location.reload());
     window.toggleAuth = () => { document.getElementById('loginView').classList.toggle('hidden'); document.getElementById('signupView').classList.toggle('hidden'); };
-    
     window.switchTab = (t) => {
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
