@@ -20,7 +20,7 @@
             --bg-purple: #8b5cf6;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { min-height: 100vh; font-family: 'Poppins', sans-serif; background: var(--bg-purple); display: flex; align-items: center; justify-content: center; padding: 15px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        body { min-height: 100vh; font-family: 'Poppins', sans-serif; background: var(--bg-purple); display: flex; align-items: center; justify-content: center; padding: 15px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); position: relative; }
         
         #notification-toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
@@ -30,6 +30,8 @@
             border-left: 5px solid #a855f7; animation: slideDown 0.3s ease-out;
         }
         @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+
+        .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.6rem; color: rgba(255,255,255,0.5); font-weight: 600; pointer-events: none; z-index: 9999; }
 
         .auth-container { width: 100%; max-width: 1000px; background: white; border-radius: 25px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
         .auth-left { background: var(--primary-grad); padding: 40px; color: white; flex: 1.2; display: flex; flex-direction: column; justify-content: center; }
@@ -67,6 +69,8 @@
     </style>
 </head>
 <body>
+
+    <div class="version-tag">v1.0.2</div>
 
     <div id="notification-toast">
         <span id="notif-icon">🔔</span>
@@ -173,7 +177,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // FIX: Enable Offline Persistence (Better for iPhone sync)
     enableIndexedDbPersistence(db).catch((err) => {
         console.warn("Persistence failed", err.code);
     });
@@ -183,7 +186,6 @@
     let isInitialLoadChore = true;
     let isInitialLoadPayout = true;
 
-    // FIX: Robust Service Worker registration for Push
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
@@ -253,7 +255,6 @@
     }
 
     function loadData() {
-        // FIX: Ensure balance pulls from correct shared doc
         onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
             const val = s.exists() ? s.data().amount : 0;
             document.getElementById('balanceDisplay').innerText = `$${Number(val).toFixed(2)}`;
