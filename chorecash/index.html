@@ -9,85 +9,91 @@
     <meta name="theme-color" content="#8b5cf6">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png">
     
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ChoreCash%20Elite%22,%22short_name%22:%22ChoreCash%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22%238b5cf6%22,%22theme_color%22:%22%238b5cf6%22}">
+
     <title>ChoreCash Elite</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --button-grad: linear-gradient(90deg, #6366f1 0%, #ec4899 100%);
             --bg-purple: #8b5cf6;
-            --card-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; transition: all 0.2s ease-in-out; }
-        body { min-height: 100vh; font-family: 'Poppins', sans-serif; background: var(--bg-purple); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { min-height: 100vh; font-family: 'Poppins', sans-serif; background: var(--bg-purple); display: flex; align-items: center; justify-content: center; padding: 15px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
         
-        /* AUTH SECTION - UNCHANGED LAYOUT */
+        #notification-toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 15px 25px; border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
+            display: none; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;
+            border-left: 5px solid #a855f7; animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+
         .auth-container { width: 100%; max-width: 1000px; background: white; border-radius: 25px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
         .auth-left { background: var(--primary-grad); padding: 40px; color: white; flex: 1.2; display: flex; flex-direction: column; justify-content: center; }
         .logo-display { width: 80px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
         .auth-left h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
-        .auth-right { flex: 1; padding: 40px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 500px; }
+        .auth-right { flex: 1; padding: 40px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .auth-right h2 { font-size: 0.8rem; letter-spacing: 3px; color: #6366f1; margin-bottom: 30px; font-weight: 700; text-transform: uppercase; }
-        @media (min-width: 850px) { .auth-container { flex-direction: row; } }
-
-        /* DASHBOARD - STABLE & FIRM */
-        .dashboard { width: 100%; max-width: 1200px; display: none; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        
-        /* Web/Tablet Improvement */
-        @media (min-width: 900px) {
-            .dashboard-grid { grid-template-columns: 350px 1fr; align-items: start; }
-            .side-panel { position: sticky; top: 20px; }
-        }
-
-        .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; box-shadow: var(--card-shadow); }
-        .amount { font-size: 3.5rem; font-weight: 800; }
-        
-        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: var(--card-shadow); min-height: 200px; }
-        
-        /* MENU - FIRM & CONSISTENT */
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.1); padding: 6px; border-radius: 18px; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; }
-        .tab { flex: 1; padding: 14px; border-radius: 12px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; min-width: 100px; }
-        .tab.active { background: white; color: var(--bg-purple); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        @media (min-width: 850px) { .auth-container { flex-direction: row; min-height: 580px; } }
 
         .input-group { position: relative; margin-bottom: 15px; width: 100%; }
-        .input-field { width: 100%; padding: 16px 15px 16px 50px; border-radius: 35px; border: 1px solid #eee; background: #f9f9f9; outline: none; font-family: inherit; font-size: 0.95rem; }
-        .input-field:focus { border-color: #a855f7; background: white; }
+        .input-group span { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); z-index: 2; }
+        .input-field { width: 100%; padding: 16px 15px 16px 50px; border-radius: 35px; border: none; background: #f3f0ff; outline: none; font-family: inherit; font-size: 0.95rem; display: block; -webkit-appearance: none; }
 
-        .btn-main { width: 100%; padding: 16px; border-radius: 35px; border: none; background: var(--button-grad); color: white; font-weight: 700; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); }
-        .btn-action { padding: 10px 18px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; margin-left: 5px; font-size: 0.8rem; }
-        
-        .chore-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: #fff; border-radius: 18px; margin-bottom: 12px; border: 1px solid #f0f0f0; }
-        .chore-item:hover { border-color: #d8b4fe; transform: translateY(-2px); }
-        
+        .dashboard { width: 100%; max-width: 1100px; display: none; }
+        .dash-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 900px) { .dash-grid { grid-template-columns: 380px 1fr; } }
+
+        .balance-card { background: var(--primary-grad); color: white; border-radius: 25px; padding: 30px; text-align: center; margin-bottom: 20px; }
+        .amount { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
+        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); margin-bottom: 15px; }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 15px; overflow-x: auto; }
+        .tab { flex: 1; padding: 12px 10px; border-radius: 10px; border: none; background: transparent; color: white; font-weight: 700; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
+        .tab.active { background: white; color: var(--bg-purple); }
+
+        .btn-main { width: 100%; padding: 16px; border-radius: 35px; border: none; background: var(--button-grad); color: white; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; }
+        .btn-action { padding: 10px 15px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
+        .btn-start { background: #10b981; color: white; }
+        .btn-finish { background: #f59e0b; color: white; }
+        .btn-locked { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
+
+        .chore-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
+        .schedule-tag { font-size: 0.65rem; color: #6366f1; font-weight: 700; display: block; }
         .hidden { display: none !important; }
         .link-text { color: #6366f1; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <div id="notification-toast">
+        <span id="notif-icon">🔔</span>
+        <span id="notif-text">Notification</span>
+    </div>
+
     <div id="authScreen" class="auth-container">
         <div class="auth-left">
             <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" class="logo-display">
             <h1>Welcome to<br>ChoreCash</h1>
-            <p>Firm, stable family management.</p>
+            <p>The ultimate way to manage family chores and rewards.</p>
         </div>
         <div id="loginView" class="auth-right">
             <h2>USER LOGIN</h2>
             <form onsubmit="event.preventDefault(); handleLogin();">
-                <div class="input-group"><input type="email" id="loginEmail" class="input-field" placeholder="Email Address" required></div>
-                <div class="input-group"><input type="password" id="loginPass" class="input-field" placeholder="Password" required></div>
+                <div class="input-group"><span>👤</span><input type="email" id="loginEmail" class="input-field" placeholder="Email Address" required></div>
+                <div class="input-group"><span>🔒</span><input type="password" id="loginPass" class="input-field" placeholder="Password" required></div>
                 <button type="submit" class="btn-main">LOGIN</button>
             </form>
-            <p style="margin-top:20px; font-size:0.8rem;">Need access? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
+            <p style="margin-top:20px; font-size:0.8rem;">Don't have an account? <span class="link-text" onclick="toggleAuth()">Sign Up</span></p>
         </div>
         <div id="signupView" class="auth-right hidden">
             <h2>CREATE ACCOUNT</h2>
             <form onsubmit="event.preventDefault(); handleSignup();">
-                <div class="input-group"><input type="email" id="regEmail" class="input-field" placeholder="Email Address" required></div>
-                <div class="input-group"><input type="password" id="regPass" class="input-field" placeholder="Password" required></div>
-                <div class="input-group"><select id="regRole" class="input-field" style="padding-left:15px;"><option value="kid">Account Type: Kid</option><option value="parent">Account Type: Parent/Mom</option></select></div>
+                <div class="input-group"><span>👤</span><input type="email" id="regEmail" class="input-field" placeholder="Email Address" required></div>
+                <div class="input-group"><span>🔒</span><input type="password" id="regPass" class="input-field" placeholder="Password" required></div>
+                <div class="input-group"><span>👑</span><select id="regRole" class="input-field"><option value="kid">Account Type: Kid</option><option value="parent">Account Type: Parent/Mom</option></select></div>
                 <button type="submit" class="btn-main">SIGN UP</button>
             </form>
             <p style="margin-top:20px; font-size:0.8rem;">Back to <span class="link-text" onclick="toggleAuth()">Login</span></p>
@@ -95,53 +101,55 @@
     </div>
 
     <div id="appScreen" class="dashboard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; padding: 0 10px;">
-            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:45px;">
-            <div class="tab-bar">
-                <button class="tab active" onclick="switchTab('active', this)">BOARD</button>
-                <button class="tab" onclick="switchTab('payouts', this)">HISTORY</button>
-                <button class="tab" id="actionTab" onclick="switchTab('action', this)">ACTION</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <img src="https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png" style="width:35px;">
+            <div>
+                <button onclick="requestNotificationPermission()" id="notifBtn" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 12px; margin-right: 5px; cursor: pointer;">🔔 Enable Alerts</button>
+                <button onclick="handleLogout()" style="color: white; background: rgba(0,0,0,0.3); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">Logout</button>
             </div>
-            <button onclick="handleLogout()" style="color: white; background: rgba(255,255,255,0.2); border: none; padding: 10px 20px; border-radius: 30px; font-weight: 700; cursor:pointer;">Logout</button>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="side-panel">
-                <div class="balance-card">
-                    <h3 style="font-size:0.7rem; opacity:0.8; letter-spacing: 1px;">TOTAL BALANCE</h3>
-                    <div id="balanceDisplay" class="amount">$0.00</div>
-                    <button id="payoutBtn" onclick="resetBalance()" class="btn-main" style="background:white; color:#6366f1; font-size:0.75rem; padding:12px; margin-top:15px;">SEND PAYOUT</button>
-                </div>
+        <div class="tab-bar">
+            <button class="tab active" onclick="switchTab('active')">BOARD</button>
+            <button class="tab" onclick="switchTab('upcoming')">UPCOMING</button>
+            <button class="tab" onclick="switchTab('payouts')">PAYOUTS</button>
+            <button class="tab hidden" id="parentSchedBtn" onclick="switchTab('schedule')">SCHEDULE</button>
+        </div>
 
-                <div id="actionSection" class="card">
-                    <h4 id="actionTitle" style="font-size:1rem; margin-bottom:5px;">Propose a Chore</h4>
-                    <p id="actionSub" style="font-size: 0.75rem; color: #777; margin-bottom:20px;">Suggested tasks need approval.</p>
-                    <form onsubmit="event.preventDefault(); submitChore();">
-                        <input type="text" id="taskName" class="input-field" style="margin-bottom:12px" placeholder="Task Name" required>
-                        <input type="number" id="taskPrice" class="input-field" style="margin-bottom:12px" placeholder="Value ($)" step="0.01" required>
-                        <input type="date" id="taskDate" class="input-field" style="margin-bottom:20px" required>
-                        <button type="submit" id="submitBtn" class="btn-main">SUBMIT</button>
-                    </form>
-                </div>
+        <div class="dash-grid">
+            <div class="balance-card">
+                <h3 id="balanceLabel" style="font-size:0.65rem; opacity:0.8;">BALANCE</h3>
+                <div id="balanceDisplay" class="amount">$0.00</div>
+                <button id="kidResetBtn" onclick="resetBalance()" class="btn-main" style="background:white; color:#6366f1; font-size:0.75rem; padding:10px; margin-top:10px;">PAY & RESET</button>
             </div>
-
-            <div class="main-panel">
-                <div id="activeSection">
-                    <div class="card" id="requestsCard" style="display:none; border: 2px solid #a855f7; background: #fdfaff;">
-                        <h4 style="margin-bottom:15px; color:#a855f7;">Pending Approvals</h4>
-                        <div id="requestList"></div>
-                    </div>
+            <div id="mainCol">
+                <div id="activeSection" class="section">
                     <div class="card">
-                        <h4 style="margin-bottom:20px;">Current Chore Board</h4>
+                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Active Tasks</h4>
                         <div id="choreList"></div>
                     </div>
                 </div>
-
-                <div id="payoutsSection" class="hidden">
+                <div id="upcomingSection" class="section hidden">
+                    <div class="card"><h4 style="margin-bottom:15px; font-size: 0.9rem;">Future Tasks</h4><div id="upcomingList"></div></div>
+                </div>
+                <div id="payoutsSection" class="section hidden">
+                    <div class="card"><h4 style="margin-bottom:15px; font-size: 0.9rem;">Payout History</h4><div id="payoutList"></div></div>
+                </div>
+                <div id="scheduleSection" class="section hidden">
                     <div class="card">
-                        <h4 style="margin-bottom:20px;">Payout History</h4>
-                        <div id="payoutList"></div>
+                        <h4 style="margin-bottom:15px; font-size: 0.9rem;">Schedule New Task</h4>
+                        <form onsubmit="event.preventDefault(); createChore();">
+                            <div class="input-group"><span>📝</span><input type="text" id="taskName" class="input-field" placeholder="Task Name" required></div>
+                            <div class="input-group"><span>💰</span><input type="number" id="taskPrice" class="input-field" placeholder="Value ($)" step="0.01" required></div>
+                            <div class="input-group"><span>📅</span><input type="date" id="taskDate" class="input-field" required></div>
+                            <div class="input-group"><span>🔄</span><select id="taskRepeat" class="input-field"><option value="none">One Time Only</option><option value="daily">Repeats Daily</option><option value="weekly">Repeats Weekly</option></select></div>
+                            <button type="submit" class="btn-main">SCHEDULE TASK</button>
+                        </form>
                     </div>
+                </div>
+                <div class="card">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 15px;">Recent Activity</h4>
+                    <div id="historyList"></div>
                 </div>
             </div>
         </div>
@@ -150,9 +158,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    emailjs.init("PASTE_YOUR_PUBLIC_KEY_HERE"); 
+    import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc, collection, addDoc, query, orderBy, limit, runTransaction, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCinpQHRf32negN8ORvt7Ohl6VF9wjVys4",
@@ -169,20 +175,63 @@
 
     const DEV_EMAIL = "loganwestlake933@gmail.com";
     let currentRole = null;
-    let kidEmail = "";
+    let isInitialLoadChore = true;
+    let isInitialLoadPayout = true;
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(e => {
+                const blob = new Blob([`
+                    self.addEventListener('push', e => {
+                        const d = e.data.json();
+                        self.registration.showNotification(d.title, { body: d.body, icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png' });
+                    });
+                `], { type: 'text/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
+            });
+        });
+    }
+
+    window.requestNotificationPermission = async () => {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            showNotification("Alerts are now ACTIVE!", "✅");
+            document.getElementById('notifBtn').style.display = 'none';
+        } else {
+            alert("To get notifications, go to Settings > Safari > Advanced > Feature Flags and ensure 'Push API' is on, then Add to Home Screen.");
+        }
+    };
+
+    function showNotification(text, icon = "🔔") {
+        const toast = document.getElementById('notification-toast');
+        document.getElementById('notif-text').innerText = text;
+        document.getElementById('notif-icon').innerText = icon;
+        toast.style.display = 'flex';
+        setTimeout(() => toast.style.display = 'none', 4000);
+
+        if (Notification.permission === "granted") {
+            try {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("ChoreCash", {
+                        body: text,
+                        icon: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png',
+                        badge: 'https://i.postimg.cc/tChPpHLk/logo-removebg-preview.png'
+                    });
+                });
+            } catch (e) {
+                new Notification("ChoreCash", { body: text });
+            }
+        }
+    }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const d = await getDoc(doc(db, "users", user.uid));
-            currentRole = (user.email === DEV_EMAIL) ? 'parent' : (d.exists() ? d.data().role : 'kid');
-            const usersSnap = await getDocs(collection(db, "users"));
-            usersSnap.forEach(u => { if(u.data().role === 'kid') kidEmail = u.data().email; });
-
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'block';
-            document.getElementById('taskDate').valueAsDate = new Date();
-            
-            setupUI();
+            if (user.email === DEV_EMAIL) { currentRole = 'parent'; setupDashboard('parent'); }
+            else { 
+                const d = await getDoc(doc(db, "users", user.uid));
+                currentRole = d.exists() ? d.data().role : 'kid';
+                setupDashboard(currentRole);
+            }
             loadData();
         } else {
             document.getElementById('authScreen').style.display = 'flex';
@@ -190,114 +239,109 @@
         }
     });
 
-    function setupUI() {
-        const actionTab = document.getElementById('actionTab');
-        const title = document.getElementById('actionTitle');
-        const sub = document.getElementById('actionSub');
-        const btn = document.getElementById('submitBtn');
-
-        if (currentRole === 'parent') {
-            actionTab.innerText = "ADD TASK";
-            title.innerText = "Schedule Chore";
-            sub.innerText = "Push a task to the board.";
-            btn.innerText = "ADD TO BOARD";
-        } else {
-            actionTab.innerText = "PROPOSE";
-            title.innerText = "Propose Chore";
-            sub.innerText = "Suggest a task to your parent.";
-            btn.innerText = "SEND REQUEST";
-        }
-    }
-
-    async function sendFreeEmail(to, subject, message) {
-        if (!to) return;
-        emailjs.send("service_9raauft", "PASTE_YOUR_TEMPLATE_ID_HERE", { to_email: to, subject: subject, message: message });
+    function setupDashboard(role) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('appScreen').style.display = 'block';
+        if (role === 'parent') document.getElementById('parentSchedBtn').classList.remove('hidden');
+        if (Notification.permission === "granted") document.getElementById('notifBtn').style.display = 'none';
     }
 
     function loadData() {
         onSnapshot(doc(db, "appData", "sharedBalance"), (s) => {
             document.getElementById('balanceDisplay').innerText = `$${(s.exists() ? s.data().amount : 0).toFixed(2)}`;
         });
-        onSnapshot(collection(db, "chores"), (snap) => renderChores(snap));
-        onSnapshot(collection(db, "payouts"), (snap) => renderPayouts(snap));
+
+        onSnapshot(collection(db, "chores"), (snap) => {
+            if (!isInitialLoadChore && currentRole === 'kid') {
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added") showNotification(`New Task Added: ${change.doc.data().name}`, "📝");
+                });
+            }
+            isInitialLoadChore = false;
+            renderChores(snap);
+        });
+
+        onSnapshot(collection(db, "payouts"), (snap) => {
+            if (!isInitialLoadPayout && currentRole === 'kid') {
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added") showNotification(`Money Sent! Check Payouts.`, "💰");
+                });
+            }
+            isInitialLoadPayout = false;
+            renderPayouts(snap);
+        });
+
+        onSnapshot(query(collection(db, "history"), orderBy("completedAt", "desc"), limit(10)), (snap) => {
+            const hList = document.getElementById('historyList'); hList.innerHTML = '';
+            snap.forEach(d => {
+                const h = d.data();
+                hList.innerHTML += `<div class="chore-item" style="opacity:0.6;font-size:0.8rem;"><span>✅ ${h.name}</span><span>$${h.price.toFixed(2)}</span></div>`;
+            });
+        });
     }
 
     function renderChores(snap) {
-        const list = document.getElementById('choreList');
-        const reqList = document.getElementById('requestList');
-        list.innerHTML = ''; reqList.innerHTML = '';
-        const today = new Date().toISOString().split('T')[0];
-        let hasRequests = false;
-
+        const activeList = document.getElementById('choreList');
+        const upcomingList = document.getElementById('upcomingList');
+        activeList.innerHTML = ''; upcomingList.innerHTML = '';
+        const todayStr = new Date().toISOString().split('T')[0];
+        let activeTaskNames = [];
+        snap.forEach(d => { if(d.data().status === 'active') activeTaskNames.push(d.data().name); });
         snap.forEach(d => {
             const c = d.data();
-            const isTodayOrPast = c.date <= today;
-
-            if (c.status === 'pending') {
-                hasRequests = true;
-                reqList.innerHTML += `<div class="chore-item">
-                    <div><b>${c.name}</b><br><small>$${c.price.toFixed(2)} (${c.date})</small></div>
-                    <div>
-                        <button class="btn-action" style="background:#10b981;color:white;" onclick="approveChore('${d.id}', '${c.name}', ${c.price})">✓</button>
-                        <button class="btn-action" style="background:#ef4444;color:white;" onclick="denyChore('${d.id}')">✕</button>
-                    </div>
-                </div>`;
+            if (c.status === 'active') {
+                activeList.innerHTML += `<div class="chore-item"><div><b>${c.name}</b><br><span style="font-size:0.6rem;color:#6366f1;">$${c.price.toFixed(2)}</span></div>${currentRole === 'kid' ? `<button class="btn-action btn-finish" onclick="finishChore('${d.id}', '${c.name}', ${c.price}, '${c.repeat}')">Finish</button>` : ''}</div>`;
             } else {
-                list.innerHTML += `<div class="chore-item">
-                    <div><b>${c.name}</b><br><small>$${c.price.toFixed(2)} • ${c.date}</small></div>
-                    ${currentRole === 'kid' ? 
-                        (isTodayOrPast ? `<button class="btn-action" style="background:#10b981;color:white;" onclick="finishChore('${d.id}', ${c.price})">Done</button>` : `<span style="font-size:0.7rem;color:#999 italic">Locked</span>`) 
-                        : `<button class="btn-action" style="background:#ef4444;color:white;" onclick="denyChore('${d.id}')">Delete</button>`
-                    }
-                </div>`;
+                const alreadyActive = activeTaskNames.includes(c.name);
+                const btn = (c.date <= todayStr && !alreadyActive) ? `<button class="btn-action btn-start" onclick="activateChore('${d.id}')">Accept</button>` : `<button class="btn-action btn-locked" disabled>${alreadyActive ? 'Active' : 'Locked'}</button>`;
+                upcomingList.innerHTML += `<div class="chore-item"><div><span class="schedule-tag">${c.date === todayStr ? 'TODAY' : c.date}</span><b>${c.name}</b></div>${currentRole === 'kid' ? btn : ''}</div>`;
             }
         });
-        if (currentRole === 'parent') document.getElementById('requestsCard').style.display = hasRequests ? 'block' : 'none';
     }
 
     function renderPayouts(snap) {
-        const list = document.getElementById('payoutList'); list.innerHTML = '';
+        const pList = document.getElementById('payoutList');
+        pList.innerHTML = snap.empty ? '<p style="font-size:0.8rem;text-align:center;color:#999;">No payouts yet.</p>' : '';
         snap.forEach(d => {
-            list.innerHTML += `<div class="chore-item"><span>Payout Verified</span><b>$${d.data().amount.toFixed(2)}</b></div>`;
+            const p = d.data();
+            pList.innerHTML += `<div class="chore-item" style="font-size:0.8rem;"><span>💰 Cash-out</span><b style="color:#10b981;">+$${p.amount.toFixed(2)}</b></div>`;
         });
     }
 
-    window.submitChore = async () => {
+    window.createChore = async () => {
         const n = document.getElementById('taskName').value;
         const p = parseFloat(document.getElementById('taskPrice').value);
         const d = document.getElementById('taskDate').value;
-        const status = (currentRole === 'parent') ? 'active' : 'pending';
-        await addDoc(collection(db, "chores"), { name: n, price: p, date: d, status: status });
-        
-        if (currentRole === 'kid') {
-            sendFreeEmail(DEV_EMAIL, "New Request", `Proposed: ${n} for $${p}`);
-            alert("Request Sent!");
-        }
-        document.getElementById('taskName').value = ''; 
-        document.getElementById('taskPrice').value = '';
+        const r = document.getElementById('taskRepeat').value;
+        await addDoc(collection(db, "chores"), { name: n, price: p, date: d, repeat: r, status: 'scheduled' });
+        document.getElementById('taskName').value = ''; document.getElementById('taskPrice').value = '';
+        showNotification("Task Sent!", "🚀");
     };
 
-    window.approveChore = async (id, name, price) => {
-        await updateDoc(doc(db, "chores", id), { status: 'active' });
-    };
+    window.activateChore = async (id) => await updateDoc(doc(db, "chores", id), { status: 'active' });
 
-    window.denyChore = async (id) => await deleteDoc(doc(db, "chores", id));
-
-    window.finishChore = async (id, price) => {
+    window.finishChore = async (id, name, price, repeat) => {
         await runTransaction(db, async (t) => {
             const bRef = doc(db, "appData", "sharedBalance");
             const bSnap = await t.get(bRef);
             t.update(bRef, { amount: (bSnap.exists() ? bSnap.data().amount : 0) + price });
-            t.delete(doc(db, "chores", id));
+            t.set(doc(collection(db, "history")), { name, price, completedAt: serverTimestamp() });
+            if (repeat === 'none') t.delete(doc(db, "chores", id));
+            else {
+                let next = new Date();
+                next.setDate(next.getDate() + (repeat === 'daily' ? 1 : 7));
+                t.update(doc(db, "chores", id), { status: 'scheduled', date: next.toISOString().split('T')[0] });
+            }
         });
     };
 
     window.resetBalance = async () => {
-        const s = await getDoc(doc(db, "appData", "sharedBalance"));
-        const amt = s.data().amount;
-        if (amt > 0 && confirm(`Confirm payout of $${amt.toFixed(2)}?`)) {
+        const docSnap = await getDoc(doc(db, "appData", "sharedBalance"));
+        const amt = docSnap.data().amount;
+        if(amt > 0 && confirm(`Pay out $${amt.toFixed(2)}?`)) {
             await addDoc(collection(db, "payouts"), { amount: amt, timestamp: serverTimestamp() });
             await updateDoc(doc(db, "appData", "sharedBalance"), { amount: 0 });
+            showNotification("Payout Recorded!", "💸");
         }
     };
 
@@ -306,26 +350,11 @@
     window.handleLogout = () => signOut(auth).then(() => window.location.reload());
     window.toggleAuth = () => { document.getElementById('loginView').classList.toggle('hidden'); document.getElementById('signupView').classList.toggle('hidden'); };
     
-    window.switchTab = (tabName, el) => {
-        const isMobile = window.innerWidth < 900;
-        
-        // Tab switching logic
-        if (tabName === 'action') {
-            document.getElementById('activeSection').classList.add('hidden');
-            document.getElementById('payoutsSection').classList.add('hidden');
-            document.getElementById('actionSection').classList.remove('hidden');
-        } else if (tabName === 'payouts') {
-            document.getElementById('activeSection').classList.add('hidden');
-            document.getElementById('actionSection').classList.add(isMobile ? 'hidden' : 'dummy');
-            document.getElementById('payoutsSection').classList.remove('hidden');
-        } else {
-            document.getElementById('payoutsSection').classList.add('hidden');
-            document.getElementById('actionSection').classList.add(isMobile ? 'hidden' : 'dummy');
-            document.getElementById('activeSection').classList.remove('hidden');
-        }
-
+    window.switchTab = (t) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
+        document.getElementById(t + 'Section').classList.remove('hidden');
+        [...document.querySelectorAll('.tab')].find(b => b.innerText.toLowerCase().includes(t.toLowerCase()) || (t === 'active' && b.innerText === 'BOARD')).classList.add('active');
     };
 </script>
 </body>
