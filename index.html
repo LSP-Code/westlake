@@ -2,245 +2,318 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Westlake Family Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modern Home Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --accent: #10b981;
+            --bg-color: #f4f4f4;
+            --card-white: #ffffff;
+            --card-dark: #121212;
+            --text-main: #1a1a1a;
+            --text-muted: #888;
+            --accent-soft: #e0e0e0;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg-gradient);
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+
+        .app-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 30px;
         }
 
-        header {
-            width: 100%;
-            padding: 3rem 1rem;
-            text-align: center;
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.025em;
+        .hero-section {
+            margin-bottom: 35px;
         }
 
-        header p {
+        #day-greeting {
+            font-size: 16px;
             color: var(--text-muted);
-            font-size: 1.1rem;
+            margin-bottom: 5px;
         }
 
-        .main-container {
-            width: 100%;
-            max-width: 1100px;
-            padding: 0 1.5rem 4rem;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
+        .hero-title {
+            font-size: 32px;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .time-widget {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.05);
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        #taskInput {
+            width: 100%;
+            padding: 18px 25px;
+            border-radius: 20px;
+            border: none;
+            background: var(--card-white);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .add-btn-float {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--card-dark);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .section-label {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .section-title::after {
-            content: "";
-            height: 1px;
-            flex-grow: 1;
-            background: #cbd5e1;
-        }
-
-        .grid {
+        .task-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
-        .app-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 2rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
+        .task-card {
+            background: var(--card-dark);
+            color: white;
+            padding: 20px;
+            border-radius: 25px;
+            min-height: 140px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            animation: fadeIn 0.4s ease;
         }
 
-        .app-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: var(--primary);
+        .task-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.3;
         }
 
-        .icon-box {
+        .task-card .status {
+            font-size: 11px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .delete-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            opacity: 0.5;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .planned-card {
+            background: var(--card-white);
+            padding: 25px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .planned-icon {
             width: 60px;
             height: 60px;
-            background: #eef2ff;
-            border-radius: 14px;
+            background: #f0f0f0;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            transition: background 0.3s ease;
+            font-size: 24px;
         }
 
-        .app-card:hover .icon-box {
-            background: var(--primary);
-        }
+        .planned-info h4 { font-size: 17px; }
+        .planned-info p { font-size: 13px; color: var(--text-muted); }
 
-        .app-card:hover .icon-box span {
-            filter: brightness(0) invert(1);
-        }
-
-        .app-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: #1e293b;
-        }
-
-        .app-desc {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-launch {
-            margin-top: auto;
-            display: inline-flex;
-            align-items: center;
-            font-weight: 600;
-            color: var(--primary);
-            gap: 5px;
-        }
-
-        .placeholder-card {
-            border: 2px dashed #cbd5e1;
-            background: rgba(241, 245, 249, 0.5);
-            box-shadow: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            cursor: default;
-        }
-
-        .placeholder-card:hover {
-            transform: none;
-            border-color: #cbd5e1;
-        }
-
-        .coming-soon-text {
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--accent);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        footer {
-            margin-top: auto;
-            padding: 2rem;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            text-align: center;
-            width: 100%;
-        }
-
-        @media (max-width: 640px) {
-            header h1 { font-size: 2rem; }
-            .grid { grid-template-columns: 1fr; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Westlake Family</h1>
-        <p>Your central app dashboard</p>
-    </header>
-
-    <main class="main-container">
-        
-        <div class="section-title">Active Apps</div>
-        <div class="grid">
-            <a href="https://lsp-code.github.io/westlake/chorecash/" class="app-card">
-                <div class="badge">Live</div>
-                <div class="icon-box">
-                    <span>💰</span>
-                </div>
-                <div class="app-name">ChoreCash</div>
-                <div class="app-desc">
-                    Manage chore assignments, track earnings, and handle payouts for the whole family.
-                </div>
-                <div class="btn-launch">
-                    Open App <span>→</span>
-                </div>
-            </a>
+    <div class="app-wrapper">
+        <div class="top-nav">
+            <div class="profile-icon">H</div>
+            <div style="font-size: 20px;">🔔</div>
         </div>
 
-        <div class="section-title">Coming Soon</div>
-        <div class="grid">
-            <div class="app-card placeholder-card">
-                <div>
-                    <div class="app-name" style="color: #cbd5e1;">Family Calendar</div>
-                    <p class="coming-soon-text">Future Project</p>
-                </div>
-            </div>
-            
-            <div class="app-card placeholder-card">
-                <div>
-                    <div class="app-name" style="color: #cbd5e1;">Meal Planner</div>
-                    <p class="coming-soon-text">Future Project</p>
-                </div>
+        <div class="hero-section">
+            <p id="day-greeting">Hello,</p>
+            <h1 class="hero-title">Your <span style="font-weight: 300;">Goals</span></h1>
+            <div class="time-widget">
+                <span id="clock">00:00</span> • <span id="date">Date</span>
             </div>
         </div>
 
-    </main>
+        <div class="search-container">
+            <input type="text" id="taskInput" placeholder="Write a new task...">
+            <button class="add-btn-float" id="addTaskBtn">+</button>
+        </div>
 
-    <footer>
-        &copy; 2026 Westlake Family Portal
-    </footer>
+        <div class="section-label">📌 Active Tasks</div>
+        <div id="taskList" class="task-grid">
+            </div>
 
+        <div class="section-label">📅 Planned</div>
+        <div class="planned-card">
+            <div class="planned-icon">🎹</div>
+            <div class="planned-info">
+                <h4>Piano Practice</h4>
+                <p>Scheduled for 05:30pm</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4",
+            authDomain: "my-a-ab8f3.firebaseapp.com",
+            projectId: "my-a-ab8f3",
+            storageBucket: "my-a-ab8f3.firebasestorage.app",
+            messagingSenderId: "65984042323",
+            appId: "1:65984042323:web:04a6ebadc4eb29d52c3da6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const tasksCol = collection(db, 'tasks');
+
+        // Clock & Greeting Logic
+        function updateUI() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            const options = { month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
+
+            const hr = now.getHours();
+            let greet = hr < 12 ? "Good Morning" : hr < 18 ? "Good Afternoon" : "Good Evening";
+            document.getElementById('day-greeting').textContent = greet + ",";
+        }
+        setInterval(updateUI, 1000);
+        updateUI();
+
+        // Firebase: Add Task
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+
+        async function saveTask() {
+            const val = taskInput.value.trim();
+            if (val === "") return;
+            try {
+                await addDoc(tasksCol, {
+                    text: val,
+                    createdAt: Date.now()
+                });
+                taskInput.value = "";
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        addTaskBtn.addEventListener('click', saveTask);
+        taskInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveTask(); });
+
+        // Firebase: Real-time Listen and Delete
+        const taskList = document.getElementById('taskList');
+        const q = query(tasksCol, orderBy("createdAt", "desc"));
+
+        onSnapshot(q, (snapshot) => {
+            taskList.innerHTML = "";
+            snapshot.forEach((docData) => {
+                const task = docData.data();
+                const id = docData.id;
+                
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
+                    <div class="delete-icon" data-id="${id}">×</div>
+                    <h3>${task.text}</h3>
+                    <span class="status">Active</span>
+                `;
+                
+                // Delete Event
+                card.querySelector('.delete-icon').addEventListener('click', async (e) => {
+                    const docId = e.target.getAttribute('data-id');
+                    await deleteDoc(doc(db, "tasks", docId));
+                });
+
+                taskList.appendChild(card);
+            });
+        });
+    </script>
 </body>
 </html>
