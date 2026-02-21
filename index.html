@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v16.3</title>
+    <title>Westlake Elite // v16.7</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -41,7 +41,7 @@
             padding: 2.5vh 7vh; border-radius: 10vh; font-weight: 700; font-size: 2.2vh; cursor: pointer;
         }
 
-        /* --- Layout --- */
+        /* --- Main UI --- */
         .app-shell {
             display: flex;
             flex-direction: column;
@@ -57,7 +57,7 @@
             height: 10vh; 
         }
         .h-time { font-size: 8vh; font-weight: 300; line-height: 1; }
-        .h-weather { font-size: 3vh; color: var(--primary); opacity: 0.8; }
+        .h-weather { font-size: 3vh; color: var(--primary); opacity: 0.8; letter-spacing: 0.2vh; }
 
         .main-content {
             display: flex;
@@ -90,26 +90,26 @@
 
         .label { font-size: 1.1vh; font-weight: 700; color: var(--primary); margin-bottom: 1vh; letter-spacing: 0.1vh; text-transform: uppercase; opacity: 0.7; }
 
-        /* --- Action Buttons --- */
+        /* --- Buttons --- */
         .btn {
             background: var(--primary-container); color: var(--primary);
             border: none; padding: 1.8vh; border-radius: 1.8vh; font-size: 1.6vh; font-weight: 600;
             margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh;
-            transition: transform 0.1s;
         }
-        .btn:active { transform: scale(0.98); }
         .btn-main { background: var(--primary); color: var(--on-primary); }
         .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
         .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; }
+        .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; justify-content: center; font-size: 1.2vh; }
 
-        /* --- Overlays --- */
-        .overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; }
-        
+        /* --- Components --- */
         .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
         .rec-active { animation: pulse-red 1s infinite alternate; background: #ff4b4b !important; color: #fff !important; }
-        @keyframes pulse-red { from { opacity: 1; } to { opacity: 0.6; } }
 
-        #reg-list { overflow-y: auto; flex: 1; font-size: 1.5vh; scrollbar-width: none; margin-bottom: 1vh; }
+        #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; margin-bottom: 1vh; }
+        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        
         .siren-active { 
             display: none; position: fixed; inset: 0; z-index: 9999; 
             background: #600000; flex-direction: column; align-items: center; justify-content: center;
@@ -135,10 +135,10 @@
             <aside>
                 <div class="card">
                     <p class="label">System Hub</p>
-                    <button class="btn btn-main" onclick="openSpotify()">
+                    <button class="btn btn-main" onclick="goTo('spotify')">
                         <span style="font-size: 2vh;">♫</span> Spotify Search
                     </button>
-                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="openAlexa()">
+                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="goTo('alexa')">
                         <span style="font-size: 2vh;">◯</span> Alexa Console
                     </button>
                     <button class="btn" id="voice-btn" onclick="runVoice()">
@@ -158,7 +158,10 @@
                 <div class="card" style="flex: 1;">
                     <p class="label">Registry</p>
                     <div id="reg-list"></div>
-                    <button class="btn btn-white" style="margin-top: auto; padding: 1.2vh;" onclick="addEntry()">+ New Entry</button>
+                    <div style="display: flex; gap: 1vh; margin-top: auto;">
+                        <button class="btn btn-white" style="flex: 2; padding: 1.2vh;" onclick="addEntry()">+ New Entry</button>
+                        <button class="btn btn-ghost" style="flex: 1; padding: 1.2vh;" onclick="clearRegistry()">Clear</button>
+                    </div>
                 </div>
             </aside>
 
@@ -170,7 +173,7 @@
         </div>
     </div>
 
-    <div id="overlay-emer" class="overlay" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.97);">
+    <div id="overlay-emer" class="overlay">
         <div style="width: 35vw; text-align: center;">
             <h1 style="color:var(--error); font-size: 4.5vh; margin-bottom: 4vh;">TACTICAL ALERT</h1>
             <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh;" onclick="triggerSiren('INTRUDER ALERT')">INTRUDER</button>
@@ -187,7 +190,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4", authDomain: "my-a-ab8f3.firebaseapp.com",
@@ -206,8 +209,11 @@
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
-        window.openSpotify = () => { window.open("https://open.spotify.com", "_blank"); };
-        window.openAlexa = () => { window.open("https://alexa.amazon.com", "_blank"); };
+        // ACTUAL PAGE NAVIGATION (Replaces hub with external site)
+        window.goTo = (site) => {
+            const dest = site === 'alexa' ? "https://alexa.amazon.com" : "https://open.spotify.com";
+            window.location.href = dest;
+        };
 
         window.triggerSiren = (msg) => {
             closeLayer('emer');
@@ -248,15 +254,18 @@
 
         function clock() {
             const now = new Date();
-            document.getElementById('lc').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            document.getElementById('ht').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('lc').innerText = timeStr;
+            document.getElementById('ht').innerText = timeStr;
             setTimeout(clock, 1000);
         }
         clock();
 
         onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
             const list = document.getElementById('reg-list'); list.innerHTML = "";
-            s.forEach(d => list.innerHTML += `<div style="padding:1vh 0; border-bottom:1px solid #222"><b>${d.data().title}</b>: ${d.data().text}</div>`);
+            s.forEach(d => {
+                list.innerHTML += `<div class="reg-item"><b>${d.data().title}</b>: ${d.data().text}</div>`;
+            });
         });
 
         window.addEntry = async () => {
@@ -264,6 +273,15 @@
             const text = prompt("Note:");
             if(title && text) {
                 await addDoc(collection(db, "houseInfo"), { title: title.toUpperCase(), text: text, createdAt: serverTimestamp() });
+            }
+        };
+
+        window.clearRegistry = async () => {
+            if(confirm("Wipe all registry entries?")) {
+                const q = await getDocs(collection(db, "houseInfo"));
+                const batch = writeBatch(db);
+                q.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
             }
         };
 
