@@ -2,327 +2,209 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Family Standby v2.2.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Westlake Elite Tactical</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #000000;
-            --white: #ffffff;
-            --dim: rgba(255, 255, 255, 0.4);
-            --border: rgba(255, 255, 255, 0.15);
+        :root { 
+            --bg: #000000; --surface: #1a1c1a; --primary: #d2e7d6; 
+            --on-primary: #1e3623; --primary-container: #3d4b3f;
+            --error: #ffb4ab; --radius: 28px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); color: #e2e3dd; height: 100dvh; width: 100vw; overflow: hidden; }
+
+        /* --- Lock Screen --- */
+        #lock-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .lock-clock { font-size: 120px; font-weight: 300; margin-bottom: 20px; color: #fff; }
+        .unlock-pill {
+            background: var(--primary); color: var(--on-primary); border: none;
+            padding: 24px 60px; border-radius: 50px; font-weight: 700; font-size: 18px; cursor: pointer;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* --- Layout --- */
+        .app-container { display: grid; grid-template-columns: 400px 1fr; grid-template-rows: auto 1fr; gap: 24px; height: 100%; padding: 30px; }
+        header { grid-column: span 2; display: flex; justify-content: space-between; align-items: flex-end; }
+        .h-time { font-size: 82px; font-weight: 300; line-height: 1; }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg);
-            color: var(--white);
-            min-height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            padding: 40px 25px;
-            overflow-x: hidden;
+        .card { 
+            background: var(--surface); border-radius: var(--radius); padding: 25px;
+            display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.03);
+            min-height: 0;
         }
+        .label { font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 15px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-        /* Version & Location Tag */
-        .meta-tag {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: var(--dim);
-            font-weight: 600;
+        .btn {
+            background: var(--primary-container); color: var(--primary);
+            border: none; padding: 22px; border-radius: 22px; font-size: 16px; font-weight: 600;
+            margin-bottom: 12px; cursor: pointer; text-align: left;
         }
+        .btn-main { background: var(--primary); color: var(--on-primary); }
+        .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
 
-        /* Animations */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* --- Overlays --- */
+        .overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; }
+        .active-siren-overlay { 
+            display: none; position: fixed; inset: 0; z-index: 9999; 
+            background: #600000; flex-direction: column; align-items: center; justify-content: center;
+            animation: pulse-red 0.5s infinite alternate;
         }
+        @keyframes pulse-red { from { background: #400000; } to { background: #a00000; } }
 
-        .animate { animation: slideUp 0.8s ease-out forwards; }
-
-        /* Header Section */
-        .header {
-            width: 100%;
-            margin-bottom: 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 30px;
-        }
-
-        #greeting {
-            font-size: 14px;
-            font-weight: 200;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            color: var(--dim);
-        }
-
-        #clock {
-            font-size: clamp(80px, 18vw, 140px);
-            font-weight: 600;
-            line-height: 0.8;
-            letter-spacing: -6px;
-        }
-
-        #clock span {
-            font-size: 25px;
-            letter-spacing: 2px;
-            margin-left: 10px;
-            font-weight: 200;
-        }
-
-        .weather-display {
-            text-align: right;
-        }
-
-        #temp {
-            font-size: 50px;
-            font-weight: 200;
-            line-height: 1;
-        }
-
-        #date-sub {
-            font-size: 14px;
-            color: var(--dim);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 5px;
-        }
-
-        /* Dashboard Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            width: 100%;
-        }
-
-        .card {
-            border: 1px solid var(--border);
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--dim);
-            margin-bottom: 25px;
-        }
-
-        /* Dishes Section */
-        .rotation-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .current-person { font-size: 45px; font-weight: 400; text-transform: uppercase; }
-        .next-up { font-size: 12px; color: var(--dim); letter-spacing: 1px; }
-
-        .btn-white {
-            margin-top: 25px;
-            width: 100%;
-            padding: 20px;
-            background: var(--white);
-            color: var(--bg);
-            border: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-white:active { transform: scale(0.98); opacity: 0.8; }
-
-        /* List Styling */
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .list-item:last-child { border-bottom: none; }
-        .list-item h4 { font-size: 16px; font-weight: 400; text-transform: uppercase; }
-        .delete-icon { cursor: pointer; color: var(--dim); font-size: 20px; }
-
-        .input-underlined {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid var(--border);
-            padding: 15px 0;
-            color: var(--white);
-            outline: none;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        .input-underlined::placeholder { color: var(--dim); }
-
-        @media (min-width: 800px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-        }
+        .cal-box { width: 100%; height: 100%; border-radius: 20px; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.6); }
+        .recording { animation: pulse-mic 1.5s infinite; background: #ff4b4b !important; color: white !important; }
+        @keyframes pulse-mic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
-<body class="animate">
+<body>
 
-    <div class="meta-tag">V2.2.0 // HERNANDO COUNTY, FL</div>
+    <div id="lock-screen">
+        <div class="lock-clock" id="lc">00:00</div>
+        <button class="unlock-pill" onclick="unlockSystem()">Unlock & Initialize</button>
+    </div>
 
-    <div class="header">
-        <div class="header-left">
-            <p id="greeting">GOOD MORNING</p>
-            <div id="clock">12:00<span>AM</span></div>
-            <div id="date-sub">FEBRUARY 15, 2026</div>
-        </div>
-        <div class="weather-display">
-            <div id="temp">--°</div>
-            <div id="date-sub">LOCAL WEATHER</div>
+    <div class="app-container">
+        <header>
+            <div class="h-time" id="ht">00:00</div>
+            <div id="wt" style="font-size: 28px; color: var(--primary);">--°F</div>
+        </header>
+
+        <aside style="display: flex; flex-direction: column; gap: 24px; min-height: 0;">
+            <div class="card">
+                <p class="label">Operations</p>
+                <button class="btn btn-main" onclick="openLayer('spotify')">Music Terminal</button>
+                <button class="btn" id="voice-btn" onclick="startVoice()">🎤 Voice Announce</button>
+                <button class="btn btn-emer" onclick="openLayer('emer')">Emergency Ops</button>
+            </div>
+
+            <div class="card">
+                <p class="label">Dishes</p>
+                <h2 id="dish-user" style="font-size: 48px; font-weight: 300; color: var(--primary); margin-bottom: 10px;">---</h2>
+                <button class="btn" style="background:#fff; color:#000; text-align:center;" onclick="rotateUser()">Mark Done</button>
+            </div>
+
+            <div class="card" style="flex-grow: 1;">
+                <p class="label">Registry</p>
+                <div id="reg-list" style="overflow-y:auto; font-size: 14px;"></div>
+            </div>
+        </aside>
+
+        <main class="card" style="padding: 10px;">
+            <div class="cal-box">
+                <iframe src="https://calendar.google.com/calendar/embed?src=family14661226943060601464%40group.calendar.google.com&ctz=America%2FNew_York&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+        </main>
+    </div>
+
+    <div id="overlay-spotify" class="overlay">
+        <div style="padding:30px;"><button class="unlock-pill" onclick="closeLayer('spotify')">← Back</button></div>
+        <iframe src="https://open.spotify.com/embed/playlist/3Y6Cap7vIU0hyMZvc5f6pg?utm_source=generator" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media; fullscreen;"></iframe>
+    </div>
+
+    <div id="overlay-emer" class="overlay" style="align-items: center; justify-content: center; background: rgba(0,0,0,0.95);">
+        <div style="width: 450px; text-align: center;">
+            <h1 style="color:var(--error); font-size: 38px; margin-bottom: 30px;">Tactical Select</h1>
+            <button class="btn btn-emer" style="width:100%; text-align:center;" onclick="activateSiren('INTRUDER ALERT')">Intruder</button>
+            <button class="btn btn-emer" style="width:100%; text-align:center; margin-top:10px;" onclick="activateSiren('MEDICAL EMERGENCY')">Medical</button>
+            <button class="btn" style="width:100%; text-align:center; background:#4a3900; color:#fce99a; margin-top:10px;" onclick="activateSiren('SHELTER IN PLACE')">Shelter</button>
+            <button class="btn" style="width:100%; text-align:center; background:#fff; color:#000; margin-top:30px;" onclick="closeLayer('emer')">Cancel</button>
         </div>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <span class="label">DISHES ROTATION</span>
-            <div class="rotation-box">
-                <div>
-                    <div class="current-person" id="active-washer">BRIAN</div>
-                    <div class="next-up" id="next-washer">NEXT: LOGAN</div>
-                </div>
-                <div style="font-size: 40px; filter: grayscale(1);">🧼</div>
-            </div>
-            <button class="btn-white" id="finishDishes">DONE</button>
-        </div>
-
-        <div class="card">
-            <span class="label">HOUSE CHORES</span>
-            <div id="choreList"></div>
-            <input type="text" id="choreInput" class="input-underlined" placeholder="ADD CHORE +">
-        </div>
-
-        <div class="card">
-            <span class="label">UPCOMING EVENTS</span>
-            <div id="eventList"></div>
-            <input type="text" id="eventInput" class="input-underlined" placeholder="ADD EVENT +">
-        </div>
-
-        <div class="card">
-            <span class="label">HOUSEHOLD MEMBERS</span>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <div style="border: 1px solid var(--white); padding: 5px 15px; font-size: 12px;">TINA (MOM)</div>
-                <div style="border: 1px solid var(--white); padding: 5px 15px; font-size: 12px;">JOE (DAD)</div>
-                <div style="border: 1px solid var(--dim); color: var(--dim); padding: 5px 15px; font-size: 12px;">BRIAN</div>
-                <div style="border: 1px solid var(--dim); color: var(--dim); padding: 5px 15px; font-size: 12px;">MALAKI</div>
-                <div style="border: 1px solid var(--dim); color: var(--dim); padding: 5px 15px; font-size: 12px;">LOGAN</div>
-            </div>
-        </div>
+    <div id="siren-display" class="active-siren-overlay">
+        <h1 id="siren-text" style="font-size: 70px; font-weight: 900; color: #fff; text-align: center;"></h1>
+        <button class="unlock-pill" style="margin-top: 50px; background: #fff; color: #000;" onclick="killSiren()">ALL CLEAR / STOP AUDIO</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc } 
-        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4",
-            authDomain: "my-a-ab8f3.firebaseapp.com",
-            projectId: "my-a-ab8f3",
-            storageBucket: "my-a-ab8f3.firebasestorage.app",
-            messagingSenderId: "65984042323",
-            appId: "1:65984042323:web:04a6ebadc4eb29d52c3da6"
+            apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4", authDomain: "my-a-ab8f3.firebaseapp.com",
+            projectId: "my-a-ab8f3", storageBucket: "my-a-ab8f3.firebasestorage.app",
+            messagingSenderId: "65984042323", appId: "1:65984042323:web:04a6ebadc4eb29d52c3da6"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- Clock Logic ---
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
+        // SIREN ENGINE
+        let audioCtx;
+        let sirenInterval;
+
+        window.unlockSystem = () => {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            document.documentElement.requestFullscreen().catch(() => {});
+            document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
+        };
+
+        window.activateSiren = (msg) => {
+            closeLayer('emer');
+            document.getElementById('siren-display').style.display = 'flex';
+            document.getElementById('siren-text').innerText = msg;
             
-            document.getElementById('clock').innerHTML = `${hours}:${minutes}<span>${ampm}</span>`;
-            document.getElementById('date-sub').textContent = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+            sirenInterval = setInterval(() => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            }, 500);
 
-            let greet = "GOOD NIGHT";
-            if (now.getHours() < 12) greet = "GOOD MORNING";
-            else if (now.getHours() < 18) greet = "GOOD AFTERNOON";
-            else greet = "GOOD EVENING";
-            document.getElementById('greeting').textContent = greet;
+            const speech = new SpeechSynthesisUtterance("Warning. " + msg);
+            window.speechSynthesis.speak(speech);
+        };
+
+        window.killSiren = () => {
+            clearInterval(sirenInterval);
+            document.getElementById('siren-display').style.display = 'none';
+            window.speechSynthesis.cancel();
+        };
+
+        // VOICE
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        window.startVoice = () => {
+            document.getElementById('voice-btn').classList.add('recording');
+            rec.start();
+        };
+        rec.onresult = (e) => {
+            const t = e.results[0][0].transcript;
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Announcement: " + t));
+        };
+        rec.onend = () => document.getElementById('voice-btn').classList.remove('recording');
+
+        // UI & FIREBASE
+        window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
+        window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
+
+        function tick() {
+            const now = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('lc').innerText = now;
+            document.getElementById('ht').innerText = now;
+            setTimeout(tick, 1000);
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        tick();
 
-        // --- Weather Logic (Using your Open-Meteo URL coordinates) ---
-        async function fetchWeather() {
-            try {
-                const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=28.573042&longitude=-82.466225&current_weather=true&temperature_unit=fahrenheit");
-                const data = await response.json();
-                document.getElementById('temp').textContent = Math.round(data.current_weather.temperature) + "°";
-            } catch (e) { console.error("Weather update failed"); }
-        }
-        fetchWeather();
-        setInterval(fetchWeather, 900000); // Update every 15 minutes
-
-        // --- Dishes Rotation Logic ---
-        const rotationOrder = ["BRIAN", "LOGAN", "MALAKI"];
-        const rotationDoc = doc(db, 'settings', 'dishes');
-
-        onSnapshot(rotationDoc, (snap) => {
-            if (snap.exists()) {
-                const i = snap.data().index;
-                document.getElementById('active-washer').textContent = rotationOrder[i];
-                document.getElementById('next-washer').textContent = `NEXT: ${rotationOrder[(i + 1) % 3]}`;
-            } else { setDoc(rotationDoc, { index: 0 }); }
+        onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
+            const l = document.getElementById('reg-list'); l.innerHTML = "";
+            s.forEach(d => l.innerHTML += `<div style="padding:10px 0; border-bottom:1px solid #333"><b>${d.data().title}</b>: ${d.data().text}</div>`);
         });
 
-        document.getElementById('finishDishes').addEventListener('click', async () => {
-            const snap = await getDoc(rotationDoc);
-            await setDoc(rotationDoc, { index: (snap.data().index + 1) % 3 });
+        const rota = ["BRIAN", "MALAKI", "LOGAN"];
+        onSnapshot(doc(db, "settings", "dishes"), (s) => {
+            if(s.exists()) document.getElementById('dish-user').innerText = rota[s.data().index];
         });
 
-        // --- Firebase List Management ---
-        function bindList(colName, listId, inputId) {
-            const listEl = document.getElementById(listId);
-            const inputEl = document.getElementById(inputId);
-            onSnapshot(query(collection(db, colName), orderBy("createdAt", "desc")), (snap) => {
-                listEl.innerHTML = "";
-                snap.forEach(d => {
-                    const item = document.createElement('div');
-                    item.className = 'list-item';
-                    item.innerHTML = `<h4>${d.data().text}</h4><span class="delete-icon" onclick="window.removeItem('${colName}', '${d.id}')">×</span>`;
-                    listEl.appendChild(item);
-                });
-            });
-            inputEl.addEventListener('keypress', async (e) => {
-                if (e.key === 'Enter' && inputEl.value.trim() !== "") {
-                    await addDoc(collection(db, colName), { text: inputEl.value.toUpperCase(), createdAt: Date.now() });
-                    inputEl.value = "";
-                }
-            });
-        }
-
-        window.removeItem = async (col, id) => { await deleteDoc(doc(db, col, id)); };
-        bindList('chores', 'choreList', 'choreInput');
-        bindList('events', 'eventList', 'eventInput');
-
+        window.rotateUser = async () => {
+            const s = await getDoc(doc(db, "settings", "dishes"));
+            await updateDoc(doc(db, "settings", "dishes"), { index: (s.data().index + 1) % 3 });
+        };
     </script>
 </body>
 </html>
