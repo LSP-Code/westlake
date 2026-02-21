@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // Flex v15</title>
+    <title>Westlake Elite // Immersive v16</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --bg: #000000; 
-            --surface: #1a1c1a; 
+            --surface: #141614; 
             --primary: #d2e7d6; 
             --on-primary: #1e3623;
             --primary-container: #3d4b3f;
@@ -22,14 +22,14 @@
             font-family: 'Roboto', sans-serif; 
             background: var(--bg); 
             color: #e2e3dd;
-            height: 100dvh;
+            height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* --- Lock Screen Scaling --- */
+        /* --- Lock Screen --- */
         #lock-screen {
             position: fixed; inset: 0; background: var(--bg); z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -38,40 +38,40 @@
         .lock-clock { font-size: 15vh; font-weight: 300; color: #fff; }
         .unlock-pill {
             background: var(--primary); color: var(--on-primary); border: none;
-            padding: 3vh 8vh; border-radius: 10vh; font-weight: 700; font-size: 2.5vh; cursor: pointer;
-            margin-top: 5vh;
+            padding: 2.5vh 7vh; border-radius: 10vh; font-weight: 700; font-size: 2.2vh; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* --- Flex Dashboard Layout --- */
+        /* --- Compact Dashboard Layout --- */
         .app-shell {
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding: 3vh;
-            gap: 2vh;
+            padding: 1.5vh 2.5vh 2.5vh 2.5vh; /* Minimized top padding */
+            gap: 1.5vh;
         }
 
         header { 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-end; 
-            height: 15vh;
+            align-items: center; 
+            height: 10vh; /* Condensed Header */
         }
-        .h-time { font-size: clamp(40px, 10vh, 120px); font-weight: 300; line-height: 1; }
-        .h-weather { font-size: 4vh; color: var(--primary); }
+        .h-time { font-size: 8vh; font-weight: 300; line-height: 1; }
+        .h-weather { font-size: 3.5vh; color: var(--primary); }
 
         .main-content {
             display: flex;
             flex: 1;
-            gap: 3vh;
+            gap: 2vh;
             min-height: 0;
         }
 
         aside {
-            flex: 0 0 30vw;
+            flex: 0 0 26vw;
             display: flex;
             flex-direction: column;
-            gap: 2vh;
+            gap: 1.5vh;
         }
 
         main {
@@ -82,46 +82,57 @@
         .card { 
             background: var(--surface); 
             border-radius: var(--radius); 
-            padding: 3vh;
+            padding: 2vh;
             display: flex; 
             flex-direction: column; 
             border: 1px solid rgba(255,255,255,0.03);
             min-height: 0;
         }
 
-        .label { font-size: 1.2vh; font-weight: 700; color: var(--primary); margin-bottom: 1.5vh; letter-spacing: 0.2vh; text-transform: uppercase; }
+        .label { font-size: 1.1vh; font-weight: 700; color: var(--primary); margin-bottom: 1vh; letter-spacing: 0.1vh; text-transform: uppercase; opacity: 0.7; }
 
-        /* --- Scaling Buttons --- */
+        /* --- Action Controls --- */
         .btn {
             background: var(--primary-container); color: var(--primary);
-            border: none; padding: 2.5vh; border-radius: 2vh; font-size: 1.8vh; font-weight: 600;
-            margin-bottom: 1vh; cursor: pointer; text-align: left;
+            border: none; padding: 2vh; border-radius: 1.8vh; font-size: 1.7vh; font-weight: 600;
+            margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh;
         }
         .btn-main { background: var(--primary); color: var(--on-primary); }
         .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
 
-        /* --- Overlays --- */
-        .overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; }
-        .siren-active { 
-            display: none; position: fixed; inset: 0; z-index: 9999; 
-            background: #600000; flex-direction: column; align-items: center; justify-content: center;
-            animation: flash 0.5s infinite alternate;
+        /* --- Immersive Overlays --- */
+        .overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; }
+        
+        /* Floating Exit Button */
+        .floating-exit {
+            position: absolute; top: 3vh; left: 3vh; z-index: 6000;
+            background: rgba(210, 231, 214, 0.9); /* Mint with slight transparency */
+            color: #1e3623; border: none; padding: 1.5vh 3.5vh; border-radius: 5vh;
+            font-weight: 700; font-size: 1.8vh; cursor: pointer;
+            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        @keyframes flash { from { background: #300000; } to { background: #900000; } }
 
         .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
         
-        .recording-pulse { animation: rec 1s infinite alternate; background: #ff4b4b !important; color: #fff !important; }
-        @keyframes rec { from { opacity: 1; } to { opacity: 0.6; } }
+        .rec-active { animation: pulse-red 1s infinite alternate; background: #ff4b4b !important; color: #fff !important; }
+        @keyframes pulse-red { from { opacity: 1; } to { opacity: 0.6; } }
 
-        #reg-list { overflow-y: auto; flex: 1; font-size: 1.6vh; }
+        #reg-list { overflow-y: auto; flex: 1; font-size: 1.5vh; scrollbar-width: none; }
+        
+        /* Siren UI remains fullscreen but immersive */
+        .siren-active { 
+            display: none; position: fixed; inset: 0; z-index: 9999; 
+            background: #600000; flex-direction: column; align-items: center; justify-content: center;
+            animation: flash 0.4s infinite alternate;
+        }
+        @keyframes flash { from { background: #200000; } to { background: #900000; } }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
         <div class="lock-clock" id="lc">00:00</div>
-        <button class="unlock-pill" onclick="startSystem()">INITIALIZE SYSTEM</button>
+        <button class="unlock-pill" onclick="startSystem()">ENTER HUB</button>
     </div>
 
     <div class="app-shell">
@@ -133,25 +144,31 @@
         <div class="main-content">
             <aside>
                 <div class="card">
-                    <p class="label">Operations</p>
-                    <button class="btn btn-main" onclick="openLayer('spotify')">Music Terminal</button>
-                    <button class="btn" id="voice-btn" onclick="runVoice()">🎤 Voice Announce</button>
-                    <button class="btn btn-emer" onclick="openLayer('emer')">Emergency Matrix</button>
+                    <p class="label">System Hub</p>
+                    <button class="btn btn-main" onclick="openLayer('spotify')">
+                        <span style="font-size: 2vh;">♫</span> Music Console
+                    </button>
+                    <button class="btn" id="voice-btn" onclick="runVoice()">
+                        <span style="font-size: 2vh;">🎤</span> Voice Announce
+                    </button>
+                    <button class="btn btn-emer" onclick="openLayer('emer')">
+                        <span style="font-size: 2vh;">⚠</span> Security Alert
+                    </button>
                 </div>
 
                 <div class="card">
-                    <p class="label">Kitchen Rotation</p>
-                    <h2 id="dish-name" style="font-size: 5vh; font-weight: 300; color: var(--primary); margin-bottom: 1vh;">---</h2>
-                    <button class="btn" style="background:#fff; color:#000; text-align:center; padding: 1.5vh;" onclick="nextRotation()">Complete Cycle</button>
+                    <p class="label">Dishes Cycle</p>
+                    <h2 id="dish-name" style="font-size: 4.5vh; font-weight: 300; color: var(--primary); margin-bottom: 1.5vh;">---</h2>
+                    <button class="btn" style="background:#fff; color:#000; justify-content: center;" onclick="nextRotation()">Complete Cycle</button>
                 </div>
 
                 <div class="card" style="flex: 1;">
-                    <p class="label">House Registry</p>
+                    <p class="label">Registry</p>
                     <div id="reg-list"></div>
                 </div>
             </aside>
 
-            <main class="card" style="padding: 1vh;">
+            <main class="card" style="padding: 0.5vh;">
                 <div class="cal-box">
                     <iframe src="https://calendar.google.com/calendar/embed?src=family14661226943060601464%40group.calendar.google.com&ctz=America%2FNew_York&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff" width="100%" height="100%" frameborder="0"></iframe>
                 </div>
@@ -160,23 +177,23 @@
     </div>
 
     <div id="overlay-spotify" class="overlay">
-        <div style="padding:4vh;"><button class="unlock-pill" onclick="closeLayer('spotify')">← Back to Hub</button></div>
+        <button class="floating-exit" onclick="closeLayer('spotify')">← Exit Music</button>
         <iframe src="https://open.spotify.com/embed/playlist/3Y6Cap7vIU0hyMZvc5f6pg?utm_source=generator" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media; fullscreen;"></iframe>
     </div>
 
-    <div id="overlay-emer" class="overlay" style="align-items: center; justify-content: center; background: rgba(0,0,0,0.95);">
-        <div style="width: 40vw; text-align: center;">
-            <h1 style="color:var(--error); font-size: 5vh; margin-bottom: 4vh;">Tactical Selection</h1>
-            <button class="btn btn-emer" style="width:100%; text-align:center; padding: 4vh;" onclick="triggerSiren('INTRUDER ALERT')">INTRUDER</button>
-            <button class="btn btn-emer" style="width:100%; text-align:center; padding: 4vh; margin-top:2vh;" onclick="triggerSiren('MEDICAL EMERGENCY')">MEDICAL</button>
-            <button class="btn" style="width:100%; text-align:center; padding: 4vh; margin-top:2vh; background:#4a3900; color:#fce99a;" onclick="triggerSiren('SHELTER IN PLACE')">SHELTER</button>
-            <button class="btn" style="width:100%; text-align:center; margin-top:5vh; background:#fff; color:#000;" onclick="closeLayer('emer')">CANCEL</button>
+    <div id="overlay-emer" class="overlay" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.97);">
+        <div style="width: 35vw; text-align: center;">
+            <h1 style="color:var(--error); font-size: 4.5vh; margin-bottom: 4vh;">TACTICAL ALERT</h1>
+            <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh;" onclick="triggerSiren('INTRUDER ALERT')">INTRUDER</button>
+            <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh; margin-top:2vh;" onclick="triggerSiren('MEDICAL EMERGENCY')">MEDICAL</button>
+            <button class="btn" style="width:100%; justify-content:center; padding: 3vh; margin-top:2vh; background:#4a3900; color:#fce99a;" onclick="triggerSiren('SHELTER IN PLACE')">SHELTER</button>
+            <button class="btn" style="width:100%; justify-content:center; margin-top:5vh; background:#fff; color:#000;" onclick="closeLayer('emer')">CANCEL</button>
         </div>
     </div>
 
     <div id="siren-ui" class="siren-active">
-        <h1 id="siren-msg" style="font-size: 8vh; font-weight: 900; color: #fff; text-align: center; padding: 0 5vw;"></h1>
-        <button class="unlock-pill" style="margin-top: 10vh; background: #fff; color: #000;" onclick="stopSiren()">STOP ALL ALARMS</button>
+        <h1 id="siren-msg" style="font-size: 8vh; font-weight: 900; color: #fff;"></h1>
+        <button class="unlock-pill" style="margin-top: 8vh; background: #fff; color: #000;" onclick="stopSiren()">ALL CLEAR</button>
     </div>
 
     <script type="module">
@@ -194,14 +211,13 @@
         let audioCtx;
         let sirenLoop;
 
-        // Startup
         window.startSystem = () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
-        // Siren Engine
+        // Siren Logic
         window.triggerSiren = (msg) => {
             closeLayer('emer');
             const ui = document.getElementById('siren-ui');
@@ -212,13 +228,13 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.frequency.setValueAtTime(900, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.5);
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-            }, 600);
+                osc.frequency.setValueAtTime(850, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            }, 500);
 
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Warning. " + msg));
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
         };
 
         window.stopSiren = () => {
@@ -227,39 +243,40 @@
             window.speechSynthesis.cancel();
         };
 
-        // Voice
+        // Voice Engine
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         window.runVoice = () => {
-            document.getElementById('voice-btn').classList.add('recording-pulse');
+            document.getElementById('voice-btn').classList.add('rec-active');
             rec.start();
         };
         rec.onresult = (e) => {
             const t = e.results[0][0].transcript;
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Announcement: " + t));
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Announcement. " + t));
         };
-        rec.onend = () => document.getElementById('voice-btn').classList.remove('recording-pulse');
+        rec.onend = () => document.getElementById('voice-btn').classList.remove('rec-active');
 
         // UI Core
         window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
         window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
 
         function clock() {
-            const now = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            document.getElementById('lc').innerText = now;
-            document.getElementById('ht').innerText = now;
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('lc').innerText = timeStr;
+            document.getElementById('ht').innerText = timeStr;
             setTimeout(clock, 1000);
         }
         clock();
 
-        // Firebase
+        // Data Sync
         onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
             const list = document.getElementById('reg-list'); list.innerHTML = "";
-            s.forEach(d => list.innerHTML += `<div style="padding:1.5vh 0; border-bottom:1px solid #333"><b>${d.data().title}</b>: ${d.data().text}</div>`);
+            s.forEach(d => list.innerHTML += `<div style="padding:1vh 0; border-bottom:1px solid #222"><b>${d.data().title}</b>: ${d.data().text}</div>`);
         });
 
-        const users = ["BRIAN", "MALAKI", "LOGAN"];
+        const rota = ["BRIAN", "MALAKI", "LOGAN"];
         onSnapshot(doc(db, "settings", "dishes"), (s) => {
-            if(s.exists()) document.getElementById('dish-name').innerText = users[s.data().index];
+            if(s.exists()) document.getElementById('dish-name').innerText = rota[s.data().index];
         });
 
         window.nextRotation = async () => {
