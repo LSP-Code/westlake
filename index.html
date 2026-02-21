@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // Immersive v16</title>
+    <title>Westlake Elite // v16.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -39,15 +39,14 @@
         .unlock-pill {
             background: var(--primary); color: var(--on-primary); border: none;
             padding: 2.5vh 7vh; border-radius: 10vh; font-weight: 700; font-size: 2.2vh; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* --- Compact Dashboard Layout --- */
+        /* --- Layout --- */
         .app-shell {
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding: 1.5vh 2.5vh 2.5vh 2.5vh; /* Minimized top padding */
+            padding: 1.5vh 2.5vh 2.5vh 2.5vh;
             gap: 1.5vh;
         }
 
@@ -55,10 +54,10 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            height: 10vh; /* Condensed Header */
+            height: 10vh; 
         }
         .h-time { font-size: 8vh; font-weight: 300; line-height: 1; }
-        .h-weather { font-size: 3.5vh; color: var(--primary); }
+        .h-weather { font-size: 3vh; color: var(--primary); opacity: 0.8; }
 
         .main-content {
             display: flex;
@@ -91,35 +90,26 @@
 
         .label { font-size: 1.1vh; font-weight: 700; color: var(--primary); margin-bottom: 1vh; letter-spacing: 0.1vh; text-transform: uppercase; opacity: 0.7; }
 
-        /* --- Action Controls --- */
+        /* --- Action Buttons --- */
         .btn {
             background: var(--primary-container); color: var(--primary);
-            border: none; padding: 2vh; border-radius: 1.8vh; font-size: 1.7vh; font-weight: 600;
+            border: none; padding: 1.8vh; border-radius: 1.8vh; font-size: 1.6vh; font-weight: 600;
             margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh;
+            transition: transform 0.1s;
         }
+        .btn:active { transform: scale(0.98); }
         .btn-main { background: var(--primary); color: var(--on-primary); }
         .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
+        .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; }
 
-        /* --- Immersive Overlays --- */
+        /* --- Overlays --- */
         .overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; }
         
-        /* Floating Exit Button */
-        .floating-exit {
-            position: absolute; top: 3vh; left: 3vh; z-index: 6000;
-            background: rgba(210, 231, 214, 0.9); /* Mint with slight transparency */
-            color: #1e3623; border: none; padding: 1.5vh 3.5vh; border-radius: 5vh;
-            font-weight: 700; font-size: 1.8vh; cursor: pointer;
-            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-
         .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
-        
         .rec-active { animation: pulse-red 1s infinite alternate; background: #ff4b4b !important; color: #fff !important; }
         @keyframes pulse-red { from { opacity: 1; } to { opacity: 0.6; } }
 
-        #reg-list { overflow-y: auto; flex: 1; font-size: 1.5vh; scrollbar-width: none; }
-        
-        /* Siren UI remains fullscreen but immersive */
+        #reg-list { overflow-y: auto; flex: 1; font-size: 1.5vh; scrollbar-width: none; margin-bottom: 1vh; }
         .siren-active { 
             display: none; position: fixed; inset: 0; z-index: 9999; 
             background: #600000; flex-direction: column; align-items: center; justify-content: center;
@@ -138,15 +128,18 @@
     <div class="app-shell">
         <header>
             <div class="h-time" id="ht">00:00</div>
-            <div class="h-weather" id="wt">--°F</div>
+            <div class="h-weather">WESTLAKE ELITE TACTICAL</div>
         </header>
 
         <div class="main-content">
             <aside>
                 <div class="card">
                     <p class="label">System Hub</p>
-                    <button class="btn btn-main" onclick="openLayer('spotify')">
-                        <span style="font-size: 2vh;">♫</span> Music Console
+                    <button class="btn btn-main" onclick="openSpotify()">
+                        <span style="font-size: 2vh;">♫</span> Spotify Search
+                    </button>
+                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="openAlexa()">
+                        <span style="font-size: 2vh;">◯</span> Alexa Console
                     </button>
                     <button class="btn" id="voice-btn" onclick="runVoice()">
                         <span style="font-size: 2vh;">🎤</span> Voice Announce
@@ -159,12 +152,13 @@
                 <div class="card">
                     <p class="label">Dishes Cycle</p>
                     <h2 id="dish-name" style="font-size: 4.5vh; font-weight: 300; color: var(--primary); margin-bottom: 1.5vh;">---</h2>
-                    <button class="btn" style="background:#fff; color:#000; justify-content: center;" onclick="nextRotation()">Complete Cycle</button>
+                    <button class="btn btn-white" onclick="nextRotation()">Complete Cycle</button>
                 </div>
 
                 <div class="card" style="flex: 1;">
                     <p class="label">Registry</p>
                     <div id="reg-list"></div>
+                    <button class="btn btn-white" style="margin-top: auto; padding: 1.2vh;" onclick="addEntry()">+ New Entry</button>
                 </div>
             </aside>
 
@@ -176,18 +170,13 @@
         </div>
     </div>
 
-    <div id="overlay-spotify" class="overlay">
-        <button class="floating-exit" onclick="closeLayer('spotify')">← Exit Music</button>
-        <iframe src="https://open.spotify.com/embed/playlist/3Y6Cap7vIU0hyMZvc5f6pg?utm_source=generator" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media; fullscreen;"></iframe>
-    </div>
-
     <div id="overlay-emer" class="overlay" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.97);">
         <div style="width: 35vw; text-align: center;">
             <h1 style="color:var(--error); font-size: 4.5vh; margin-bottom: 4vh;">TACTICAL ALERT</h1>
             <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh;" onclick="triggerSiren('INTRUDER ALERT')">INTRUDER</button>
             <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh; margin-top:2vh;" onclick="triggerSiren('MEDICAL EMERGENCY')">MEDICAL</button>
             <button class="btn" style="width:100%; justify-content:center; padding: 3vh; margin-top:2vh; background:#4a3900; color:#fce99a;" onclick="triggerSiren('SHELTER IN PLACE')">SHELTER</button>
-            <button class="btn" style="width:100%; justify-content:center; margin-top:5vh; background:#fff; color:#000;" onclick="closeLayer('emer')">CANCEL</button>
+            <button class="btn btn-white" style="width:100%; margin-top:5vh;" onclick="closeLayer('emer')">CANCEL</button>
         </div>
     </div>
 
@@ -217,23 +206,23 @@
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
-        // Siren Logic
+        window.openSpotify = () => { window.open("https://open.spotify.com", "_blank"); };
+        window.openAlexa = () => { window.open("https://alexa.amazon.com", "_blank"); };
+
         window.triggerSiren = (msg) => {
             closeLayer('emer');
             const ui = document.getElementById('siren-ui');
             ui.style.display = 'flex';
             document.getElementById('siren-msg').innerText = msg;
-            
             sirenLoop = setInterval(() => {
                 const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
+                const g = audioCtx.createGain();
+                osc.connect(g); g.connect(audioCtx.destination);
                 osc.frequency.setValueAtTime(850, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.4);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                g.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.4);
             }, 500);
-
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
         };
 
@@ -243,7 +232,6 @@
             window.speechSynthesis.cancel();
         };
 
-        // Voice Engine
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         window.runVoice = () => {
             document.getElementById('voice-btn').classList.add('rec-active');
@@ -255,24 +243,29 @@
         };
         rec.onend = () => document.getElementById('voice-btn').classList.remove('rec-active');
 
-        // UI Core
         window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
         window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
 
         function clock() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            document.getElementById('lc').innerText = timeStr;
-            document.getElementById('ht').innerText = timeStr;
+            document.getElementById('lc').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('ht').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
             setTimeout(clock, 1000);
         }
         clock();
 
-        // Data Sync
         onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
             const list = document.getElementById('reg-list'); list.innerHTML = "";
             s.forEach(d => list.innerHTML += `<div style="padding:1vh 0; border-bottom:1px solid #222"><b>${d.data().title}</b>: ${d.data().text}</div>`);
         });
+
+        window.addEntry = async () => {
+            const title = prompt("Entry Title:");
+            const text = prompt("Note:");
+            if(title && text) {
+                await addDoc(collection(db, "houseInfo"), { title: title.toUpperCase(), text: text, createdAt: serverTimestamp() });
+            }
+        };
 
         const rota = ["BRIAN", "MALAKI", "LOGAN"];
         onSnapshot(doc(db, "settings", "dishes"), (s) => {
