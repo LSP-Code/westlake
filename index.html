@@ -3,157 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v17.1</title>
+    <title>Westlake Elite // v17.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg: #000000; 
-            --surface: #141614; 
-            --primary: #d2e7d6; 
-            --on-primary: #1e3623;
-            --primary-container: #3d4b3f;
-            --error: #ffb4ab;
-            --radius: 2.5vh;
+            --bg: #000000; --surface: #141614; --primary: #d2e7d6; 
+            --on-primary: #1e3623; --primary-container: #3d4b3f;
+            --error: #ffb4ab; --warning: #fce99a; --radius: 2.5vh;
         }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            background: var(--bg); 
-            color: #e2e3dd;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); color: #e2e3dd; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* --- Lock Screen --- */
-        #lock-screen {
-            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .lock-clock { font-size: 15vh; font-weight: 300; color: #fff; }
-        .unlock-pill {
-            background: var(--primary); color: var(--on-primary); border: none;
-            padding: 2.5vh 7vh; border-radius: 10vh; font-weight: 700; font-size: 2.2vh; cursor: pointer;
-        }
-
-        /* --- Main UI --- */
-        .app-shell {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            padding: 1.5vh 2.5vh 2.5vh 2.5vh;
-            gap: 1.5vh;
-        }
-
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            height: 10vh; 
-        }
+        /* Lock & Layout */
+        #lock-screen { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .unlock-pill { background: var(--primary); color: var(--on-primary); border: none; padding: 2.5vh 7vh; border-radius: 10vh; font-weight: 700; font-size: 2.2vh; cursor: pointer; }
+        .app-shell { display: flex; flex-direction: column; height: 100%; padding: 1.5vh 2.5vh 2.5vh 2.5vh; gap: 1.5vh; }
+        header { display: flex; justify-content: space-between; align-items: center; height: 10vh; }
         .h-time { font-size: 8vh; font-weight: 300; line-height: 1; }
-        .h-weather { font-size: 3vh; color: var(--primary); opacity: 0.8; letter-spacing: 0.2vh; }
+        .main-content { display: flex; flex: 1; gap: 2vh; min-height: 0; }
+        aside { flex: 0 0 26vw; display: flex; flex-direction: column; gap: 1.5vh; }
+        main { flex: 1; display: flex; }
 
-        .main-content {
-            display: flex;
-            flex: 1;
-            gap: 2vh;
-            min-height: 0;
-        }
-
-        aside {
-            flex: 0 0 26vw;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5vh;
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-        }
-
-        .card { 
-            background: var(--surface); 
-            border-radius: var(--radius); 
-            padding: 2vh;
-            display: flex; 
-            flex-direction: column; 
-            border: 1px solid rgba(255,255,255,0.03);
-            min-height: 0;
-        }
-
+        /* Cards & Buttons */
+        .card { background: var(--surface); border-radius: var(--radius); padding: 2vh; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.03); min-height: 0; }
         .label { font-size: 1.1vh; font-weight: 700; color: var(--primary); margin-bottom: 1vh; letter-spacing: 0.1vh; text-transform: uppercase; opacity: 0.7; }
-
-        /* --- Buttons --- */
-        .btn {
-            background: var(--primary-container); color: var(--primary);
-            border: none; padding: 1.8vh; border-radius: 1.8vh; font-size: 1.6vh; font-weight: 600;
-            margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh;
-        }
+        .btn { background: var(--primary-container); color: var(--primary); border: none; padding: 1.8vh; border-radius: 1.8vh; font-size: 1.6vh; font-weight: 600; margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh; }
         .btn-main { background: var(--primary); color: var(--on-primary); }
         .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
         .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; }
-        .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; justify-content: center; font-size: 1.2vh; }
-
-        /* --- Voice Animation --- */
-        .rec-active { 
-            background: #ff4b4b !important; 
-            color: #fff !important; 
-            animation: pulse 1s infinite alternate;
-        }
+        .rec-active { background: #ff4b4b !important; color: #fff !important; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
 
-        .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
-        
-        #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; margin-bottom: 1vh; }
-        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; cursor: pointer; transition: opacity 0.2s; }
-        .reg-item:hover { opacity: 0.6; }
+        /* Registry */
+        #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; }
+        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; cursor: pointer; }
 
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
-        
-        .siren-active { 
-            display: none; position: fixed; inset: 0; z-index: 9999; 
-            background: #600000; flex-direction: column; align-items: center; justify-content: center;
-            animation: flash 0.4s infinite alternate;
-        }
+        /* Overlays */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 5vw; }
+        .siren-active { display: none; position: fixed; inset: 0; z-index: 9999; background: #600000; flex-direction: column; align-items: center; justify-content: center; animation: flash 0.4s infinite alternate; }
         @keyframes flash { from { background: #200000; } to { background: #900000; } }
+        .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <div class="lock-clock" id="lc">00:00</div>
+        <div style="font-size: 15vh; font-weight: 300; color: #fff;" id="lc">00:00</div>
         <button class="unlock-pill" onclick="startSystem()">ENTER HUB</button>
     </div>
 
     <div class="app-shell">
         <header>
             <div class="h-time" id="ht">00:00</div>
-            <div class="h-weather">WESTLAKE ELITE TACTICAL</div>
+            <div style="font-size: 3vh; color: var(--primary); opacity: 0.8;">WESTLAKE ELITE TACTICAL</div>
         </header>
 
         <div class="main-content">
             <aside>
                 <div class="card">
                     <p class="label">System Hub</p>
-                    <button class="btn btn-main" onclick="openSpotify()">
-                        <span style="font-size: 2vh;">♫</span> Spotify (New Tab)
-                    </button>
-                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="replaceWithAlexa()">
-                        <span style="font-size: 2vh;">◯</span> Alexa Console
-                    </button>
-                    <button class="btn" id="voice-btn" onclick="toggleVoice()">
-                        <span id="voice-icon" style="font-size: 2vh;">🎤</span> <span id="voice-txt">Voice Announce</span>
-                    </button>
-                    <button class="btn btn-emer" onclick="openLayer('emer')">
-                        <span style="font-size: 2vh;">⚠</span> Security Alert
-                    </button>
+                    <button class="btn btn-main" onclick="window.open('https://open.spotify.com', '_blank')">♫ Spotify (New Tab)</button>
+                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="window.location.href='https://alexa.amazon.com'">◯ Alexa Console</button>
+                    <button class="btn" id="voice-btn" onclick="toggleVoice()">🎤 <span id="voice-txt">Voice Announce</span></button>
+                    <button class="btn" style="background:#2c312d;" onclick="manualBroadcast()">✉ Type Announcement</button>
+                    <button class="btn btn-emer" onclick="openLayer('emer')">⚠ Emergency Console</button>
                 </div>
 
                 <div class="card">
@@ -163,11 +76,11 @@
                 </div>
 
                 <div class="card" style="flex: 1;">
-                    <p class="label">Registry (Tap to Delete)</p>
+                    <p class="label">Registry</p>
                     <div id="reg-list"></div>
                     <div style="display: flex; gap: 1vh; margin-top: auto;">
-                        <button class="btn btn-white" style="flex: 2; padding: 1.2vh;" onclick="addEntry()">+ New Entry</button>
-                        <button class="btn btn-ghost" style="flex: 1; padding: 1.2vh;" onclick="clearRegistry()">Clear All</button>
+                        <button class="btn btn-white" style="flex: 2;" onclick="addEntry()">+ New</button>
+                        <button class="btn btn-white" style="flex: 1; background:#333; color:#fff;" onclick="clearRegistry()">Wipe</button>
                     </div>
                 </div>
             </aside>
@@ -181,12 +94,13 @@
     </div>
 
     <div id="overlay-emer" class="overlay">
-        <div style="width: 35vw; text-align: center;">
-            <h1 style="color:var(--error); font-size: 4.5vh; margin-bottom: 4vh;">TACTICAL ALERT</h1>
-            <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh;" onclick="triggerSiren('INTRUDER ALERT')">INTRUDER</button>
-            <button class="btn btn-emer" style="width:100%; justify-content:center; padding: 3vh; margin-top:2vh;" onclick="triggerSiren('MEDICAL EMERGENCY')">MEDICAL</button>
-            <button class="btn" style="width:100%; justify-content:center; padding: 3vh; margin-top:2vh; background:#4a3900; color:#fce99a;" onclick="triggerSiren('SHELTER IN PLACE')">SHELTER</button>
-            <button class="btn btn-white" style="width:100%; margin-top:5vh;" onclick="closeLayer('emer')">CANCEL</button>
+        <div style="width: 80%; max-width: 600px; display: grid; grid-template-columns: 1fr 1fr; gap: 2vh;">
+            <h1 style="grid-column: span 2; color:var(--error); text-align:center; font-size: 4vh; margin-bottom: 2vh;">SELECT ALERT TYPE</h1>
+            <button class="btn btn-emer" onclick="triggerSiren('POLICE', 'police')">POLICE</button>
+            <button class="btn btn-emer" onclick="triggerSiren('FIRE', 'fire')">FIRE</button>
+            <button class="btn btn-emer" onclick="triggerSiren('INTRUDER', 'intruder')">INTRUDER</button>
+            <button class="btn btn-emer" style="background:#4a3900; color:#fce99a;" onclick="triggerSiren('WEATHER ALERT', 'weather')">WEATHER</button>
+            <button class="btn btn-white" style="grid-column: span 2; margin-top: 2vh;" onclick="closeLayer('emer')">CANCEL</button>
         </div>
     </div>
 
@@ -207,136 +121,130 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let audioCtx;
-        let sirenLoop;
-        let isRecording = false;
-        let finalTranscript = "";
+        let audioCtx, sirenLoop, isRecording = false, finalTranscript = "";
 
         window.startSystem = () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
-        // HYBRID NAVIGATION
-        window.openSpotify = () => {
-            window.open("https://open.spotify.com", "_blank");
-        };
-
-        window.replaceWithAlexa = () => {
-            window.location.href = "https://alexa.amazon.com";
-        };
-
-        // --- CONTINUOUS VOICE ENGINE ---
-        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const rec = new Recognition();
-        rec.continuous = true;
-        rec.interimResults = true;
-        rec.lang = 'en-US';
-
+        // --- VOICE ENGINE ---
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.continuous = true; rec.interimResults = true;
         window.toggleVoice = () => {
-            const btn = document.getElementById('voice-btn');
-            const txt = document.getElementById('voice-txt');
             if (!isRecording) {
-                finalTranscript = "";
-                isRecording = true;
-                btn.classList.add('rec-active');
-                txt.innerText = "RECORDING... (Click to Finish)";
+                finalTranscript = ""; isRecording = true;
+                document.getElementById('voice-btn').classList.add('rec-active');
+                document.getElementById('voice-txt').innerText = "LISTENING...";
                 rec.start();
             } else {
-                isRecording = false;
-                rec.stop();
-                btn.classList.remove('rec-active');
-                txt.innerText = "Voice Announce";
+                isRecording = false; rec.stop();
+                document.getElementById('voice-btn').classList.remove('rec-active');
+                document.getElementById('voice-txt').innerText = "Voice Announce";
             }
         };
+        rec.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; ++i) if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript; };
+        rec.onend = () => { if (finalTranscript.trim()) broadcast(finalTranscript); };
 
-        rec.onresult = (e) => {
-            for (let i = e.resultIndex; i < e.results.length; ++i) {
-                if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
-            }
+        window.manualBroadcast = () => {
+            const msg = prompt("Enter announcement text:");
+            if (msg) broadcast(msg);
         };
 
-        rec.onend = () => {
-            if (finalTranscript.trim() !== "") {
-                const utter = new SpeechSynthesisUtterance("Attention. " + finalTranscript);
-                utter.rate = 0.9;
-                window.speechSynthesis.speak(utter);
+        function broadcast(txt) {
+            const chime = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            chime.connect(g); g.connect(audioCtx.destination);
+            chime.frequency.setValueAtTime(440, audioCtx.currentTime);
+            chime.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            chime.start(); chime.stop(audioCtx.currentTime + 0.5);
+            
+            setTimeout(() => {
+                const utter = new SpeechSynthesisUtterance("Attention. " + txt);
+                utter.rate = 0.9; window.speechSynthesis.speak(utter);
+            }, 600);
+        }
+
+        // --- SIREN ENGINE ---
+        window.triggerSiren = (msg, type) => {
+            closeLayer('emer');
+            document.getElementById('siren-ui').style.display = 'flex';
+            document.getElementById('siren-msg').innerText = msg;
+            
+            if (type === 'weather') {
+                // EAS Dual Tone
+                sirenLoop = setInterval(() => {
+                    const o1 = audioCtx.createOscillator(); const o2 = audioCtx.createOscillator();
+                    const g = audioCtx.createGain(); o1.connect(g); o2.connect(g); g.connect(audioCtx.destination);
+                    o1.frequency.value = 853; o2.frequency.value = 960; g.gain.value = 0.1;
+                    o1.start(); o2.start(); o1.stop(audioCtx.currentTime + 0.8); o2.stop(audioCtx.currentTime + 0.8);
+                }, 1000);
+            } else if (type === 'police') {
+                sirenLoop = setInterval(() => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+                    g.gain.value = 0.1; o.start(); o.stop(audioCtx.currentTime + 0.2);
+                }, 250);
+            } else if (type === 'fire') {
+                sirenLoop = setInterval(() => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    o.frequency.linearRampToValueAtTime(1000, audioCtx.currentTime + 1.5);
+                    g.gain.value = 0.1; o.start(); o.stop(audioCtx.currentTime + 1.5);
+                }, 1600);
+            } else {
+                sirenLoop = setInterval(() => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.4);
+                    g.gain.value = 0.1; o.start(); o.stop(audioCtx.currentTime + 0.4);
+                }, 500);
             }
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
         };
 
-        // --- FIREBASE SYNC ---
+        window.stopSiren = () => { clearInterval(sirenLoop); document.getElementById('siren-ui').style.display = 'none'; window.speechSynthesis.cancel(); };
+        window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
+        window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
+
+        // --- FIREBASE & CLOCK ---
+        function clock() {
+            const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('lc').innerText = timeStr; document.getElementById('ht').innerText = timeStr;
+            setTimeout(clock, 1000);
+        }
+        clock();
+
         onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
             const list = document.getElementById('reg-list'); list.innerHTML = "";
             s.forEach(d => {
-                const item = document.createElement('div');
-                item.className = 'reg-item';
+                const item = document.createElement('div'); item.className = 'reg-item';
                 item.innerHTML = `<b>${d.data().title}</b>: ${d.data().text}`;
-                item.onclick = async () => {
-                    if(confirm("Delete this entry?")) await deleteDoc(doc(db, "houseInfo", d.id));
-                };
+                item.onclick = async () => { if(confirm("Delete entry?")) await deleteDoc(doc(db, "houseInfo", d.id)); };
                 list.appendChild(item);
             });
         });
 
         window.addEntry = async () => {
-            const title = prompt("Entry Title:");
-            const text = prompt("Note:");
-            if(title && text) {
-                await addDoc(collection(db, "houseInfo"), { title: title.toUpperCase(), text: text, createdAt: serverTimestamp() });
-            }
+            const t = prompt("Title:"), n = prompt("Note:");
+            if(t && n) await addDoc(collection(db, "houseInfo"), { title: t.toUpperCase(), text: n, createdAt: serverTimestamp() });
         };
 
         window.clearRegistry = async () => {
-            if(confirm("Wipe all registry entries?")) {
+            if(confirm("Wipe all?")) {
                 const q = await getDocs(collection(db, "houseInfo"));
-                const batch = writeBatch(db);
-                q.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
+                const batch = writeBatch(db); q.forEach(d => batch.delete(d.ref)); await batch.commit();
             }
         };
 
-        // --- SYSTEM CORE ---
-        window.triggerSiren = (msg) => {
-            closeLayer('emer');
-            const ui = document.getElementById('siren-ui');
-            ui.style.display = 'flex';
-            document.getElementById('siren-msg').innerText = msg;
-            sirenLoop = setInterval(() => {
-                const osc = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                osc.connect(g); g.connect(audioCtx.destination);
-                osc.frequency.setValueAtTime(850, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.4);
-                g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-            }, 500);
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
-        };
-
-        window.stopSiren = () => {
-            clearInterval(sirenLoop);
-            document.getElementById('siren-ui').style.display = 'none';
-            window.speechSynthesis.cancel();
-        };
-
-        window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
-        window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
-
-        function clock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            document.getElementById('lc').innerText = timeStr;
-            document.getElementById('ht').innerText = timeStr;
-            setTimeout(clock, 1000);
-        }
-        clock();
-
         const rota = ["BRIAN", "MALAKI", "LOGAN"];
-        onSnapshot(doc(db, "settings", "dishes"), (s) => {
-            if(s.exists()) document.getElementById('dish-name').innerText = rota[s.data().index];
-        });
-
+        onSnapshot(doc(db, "settings", "dishes"), (s) => { if(s.exists()) document.getElementById('dish-name').innerText = rota[s.data().index]; });
         window.nextRotation = async () => {
             const s = await getDoc(doc(db, "settings", "dishes"));
             await updateDoc(doc(db, "settings", "dishes"), { index: (s.data().index + 1) % 3 });
