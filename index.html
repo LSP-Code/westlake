@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v16.7</title>
+    <title>Westlake Elite // v16.9</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -103,7 +103,13 @@
 
         /* --- Components --- */
         .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
-        .rec-active { animation: pulse-red 1s infinite alternate; background: #ff4b4b !important; color: #fff !important; }
+        
+        .rec-active { 
+            background: #ff4b4b !important; 
+            color: #fff !important; 
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse { from { opacity: 1; } to { opacity: 0.7; } }
 
         #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; margin-bottom: 1vh; }
         .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; }
@@ -142,7 +148,7 @@
                         <span style="font-size: 2vh;">◯</span> Alexa Console
                     </button>
                     <button class="btn" id="voice-btn" onclick="runVoice()">
-                        <span style="font-size: 2vh;">🎤</span> Voice Announce
+                        <span id="voice-icon" style="font-size: 2vh;">🎤</span> <span id="voice-txt">Voice Announce</span>
                     </button>
                     <button class="btn btn-emer" onclick="openLayer('emer')">
                         <span style="font-size: 2vh;">⚠</span> Security Alert
@@ -209,12 +215,59 @@
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
-        // ACTUAL PAGE NAVIGATION (Replaces hub with external site)
         window.goTo = (site) => {
             const dest = site === 'alexa' ? "https://alexa.amazon.com" : "https://open.spotify.com";
             window.location.href = dest;
         };
 
+        // --- ENHANCED VOICE ENGINE ---
+        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Recognition) {
+            alert("Speech Recognition not supported in this browser.");
+        }
+        
+        const rec = new Recognition();
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.lang = 'en-US';
+
+        window.runVoice = () => {
+            const btn = document.getElementById('voice-btn');
+            const txt = document.getElementById('voice-txt');
+            
+            // Visual feedback that we are starting
+            btn.classList.add('rec-active');
+            txt.innerText = "LISTENING...";
+            
+            try {
+                rec.start();
+            } catch (e) {
+                console.error("Mic already active or blocked", e);
+                btn.classList.remove('rec-active');
+                txt.innerText = "Voice Announce";
+            }
+        };
+
+        rec.onresult = (e) => {
+            const transcript = e.results[0][0].transcript;
+            const utter = new SpeechSynthesisUtterance("Announcement. " + transcript);
+            utter.rate = 0.9;
+            window.speechSynthesis.speak(utter);
+        };
+
+        rec.onerror = (e) => {
+            console.error("Speech Error:", e.error);
+            if(e.error === 'not-allowed') {
+                alert("Microphone access denied. Please click the Lock icon in your browser URL bar and set Microphone to 'Allow'.");
+            }
+        };
+
+        rec.onend = () => {
+            document.getElementById('voice-btn').classList.remove('rec-active');
+            document.getElementById('voice-txt').innerText = "Voice Announce";
+        };
+
+        // --- REST OF SYSTEM ---
         window.triggerSiren = (msg) => {
             closeLayer('emer');
             const ui = document.getElementById('siren-ui');
@@ -237,17 +290,6 @@
             document.getElementById('siren-ui').style.display = 'none';
             window.speechSynthesis.cancel();
         };
-
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        window.runVoice = () => {
-            document.getElementById('voice-btn').classList.add('rec-active');
-            rec.start();
-        };
-        rec.onresult = (e) => {
-            const t = e.results[0][0].transcript;
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Announcement. " + t));
-        };
-        rec.onend = () => document.getElementById('voice-btn').classList.remove('rec-active');
 
         window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
         window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
