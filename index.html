@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v17.0</title>
+    <title>Westlake Elite // v17.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -101,7 +101,7 @@
         .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; }
         .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; justify-content: center; font-size: 1.2vh; }
 
-        /* --- Voice Active Animation --- */
+        /* --- Voice Animation --- */
         .rec-active { 
             background: #ff4b4b !important; 
             color: #fff !important; 
@@ -112,7 +112,8 @@
         .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
         
         #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; margin-bottom: 1vh; }
-        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; }
+        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; cursor: pointer; transition: opacity 0.2s; }
+        .reg-item:hover { opacity: 0.6; }
 
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
         
@@ -141,10 +142,10 @@
             <aside>
                 <div class="card">
                     <p class="label">System Hub</p>
-                    <button class="btn btn-main" onclick="goTo('spotify')">
-                        <span style="font-size: 2vh;">♫</span> Spotify Search
+                    <button class="btn btn-main" onclick="openSpotify()">
+                        <span style="font-size: 2vh;">♫</span> Spotify (New Tab)
                     </button>
-                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="goTo('alexa')">
+                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="replaceWithAlexa()">
                         <span style="font-size: 2vh;">◯</span> Alexa Console
                     </button>
                     <button class="btn" id="voice-btn" onclick="toggleVoice()">
@@ -162,11 +163,11 @@
                 </div>
 
                 <div class="card" style="flex: 1;">
-                    <p class="label">Registry</p>
+                    <p class="label">Registry (Tap to Delete)</p>
                     <div id="reg-list"></div>
                     <div style="display: flex; gap: 1vh; margin-top: auto;">
                         <button class="btn btn-white" style="flex: 2; padding: 1.2vh;" onclick="addEntry()">+ New Entry</button>
-                        <button class="btn btn-ghost" style="flex: 1; padding: 1.2vh;" onclick="clearRegistry()">Clear</button>
+                        <button class="btn btn-ghost" style="flex: 1; padding: 1.2vh;" onclick="clearRegistry()">Clear All</button>
                     </div>
                 </div>
             </aside>
@@ -196,7 +197,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4", authDomain: "my-a-ab8f3.firebaseapp.com",
@@ -217,9 +218,13 @@
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
-        window.goTo = (site) => {
-            const dest = site === 'alexa' ? "https://alexa.amazon.com" : "https://open.spotify.com";
-            window.location.href = dest;
+        // HYBRID NAVIGATION
+        window.openSpotify = () => {
+            window.open("https://open.spotify.com", "_blank");
+        };
+
+        window.replaceWithAlexa = () => {
+            window.location.href = "https://alexa.amazon.com";
         };
 
         // --- CONTINUOUS VOICE ENGINE ---
@@ -232,16 +237,13 @@
         window.toggleVoice = () => {
             const btn = document.getElementById('voice-btn');
             const txt = document.getElementById('voice-txt');
-
             if (!isRecording) {
-                // START RECORDING
                 finalTranscript = "";
                 isRecording = true;
                 btn.classList.add('rec-active');
                 txt.innerText = "RECORDING... (Click to Finish)";
                 rec.start();
             } else {
-                // STOP AND BROADCAST
                 isRecording = false;
                 rec.stop();
                 btn.classList.remove('rec-active');
@@ -250,11 +252,8 @@
         };
 
         rec.onresult = (e) => {
-            let interim = "";
             for (let i = e.resultIndex; i < e.results.length; ++i) {
-                if (e.results[i].isFinal) {
-                    finalTranscript += e.results[i][0].transcript;
-                }
+                if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
             }
         };
 
@@ -266,7 +265,38 @@
             }
         };
 
-        // --- CORE FUNCTIONS ---
+        // --- FIREBASE SYNC ---
+        onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
+            const list = document.getElementById('reg-list'); list.innerHTML = "";
+            s.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'reg-item';
+                item.innerHTML = `<b>${d.data().title}</b>: ${d.data().text}`;
+                item.onclick = async () => {
+                    if(confirm("Delete this entry?")) await deleteDoc(doc(db, "houseInfo", d.id));
+                };
+                list.appendChild(item);
+            });
+        });
+
+        window.addEntry = async () => {
+            const title = prompt("Entry Title:");
+            const text = prompt("Note:");
+            if(title && text) {
+                await addDoc(collection(db, "houseInfo"), { title: title.toUpperCase(), text: text, createdAt: serverTimestamp() });
+            }
+        };
+
+        window.clearRegistry = async () => {
+            if(confirm("Wipe all registry entries?")) {
+                const q = await getDocs(collection(db, "houseInfo"));
+                const batch = writeBatch(db);
+                q.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            }
+        };
+
+        // --- SYSTEM CORE ---
         window.triggerSiren = (msg) => {
             closeLayer('emer');
             const ui = document.getElementById('siren-ui');
@@ -301,30 +331,6 @@
             setTimeout(clock, 1000);
         }
         clock();
-
-        onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
-            const list = document.getElementById('reg-list'); list.innerHTML = "";
-            s.forEach(d => {
-                list.innerHTML += `<div class="reg-item"><b>${d.data().title}</b>: ${d.data().text}</div>`;
-            });
-        });
-
-        window.addEntry = async () => {
-            const title = prompt("Entry Title:");
-            const text = prompt("Note:");
-            if(title && text) {
-                await addDoc(collection(db, "houseInfo"), { title: title.toUpperCase(), text: text, createdAt: serverTimestamp() });
-            }
-        };
-
-        window.clearRegistry = async () => {
-            if(confirm("Wipe all registry entries?")) {
-                const q = await getDocs(collection(db, "houseInfo"));
-                const batch = writeBatch(db);
-                q.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-            }
-        };
 
         const rota = ["BRIAN", "MALAKI", "LOGAN"];
         onSnapshot(doc(db, "settings", "dishes"), (s) => {
