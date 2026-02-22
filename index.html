@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v17.3.1</title>
+    <title>Westlake Elite // v17.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -29,7 +29,7 @@
             position: absolute; left: 50%; transform: translateX(-50%) translateY(-150%);
             background: #600000; border: 1px solid var(--error); padding: 1vh 3vh; 
             border-radius: 5vh; display: flex; align-items: center; gap: 2vh; 
-            transition: 0.5s ease; z-index: 9000;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9000;
         }
         #auto-alert-bar.active { transform: translateX(-50%) translateY(0); }
 
@@ -66,7 +66,7 @@
             <div class="h-time" id="ht">00:00</div>
             
             <div id="auto-alert-bar">
-                <span id="alert-text" style="color:var(--error); font-weight:bold; font-size:1.4vh;">NEW EMERGENCY ALERT</span>
+                <span id="alert-text" style="color:var(--error); font-weight:bold; font-size:1.4vh;">EMERGENCY ALERT</span>
                 <button class="btn-white" style="padding: 0.5vh 2vh; font-size: 1.2vh;" onclick="confirmBroadcast()">ANNOUNCE</button>
                 <button class="btn" style="background:transparent; color:white;" onclick="dismissAlert()">✕</button>
             </div>
@@ -139,33 +139,36 @@
 
         let audioCtx, sirenLoop, isRecording = false, finalTranscript = "";
         let pendingAlertText = "";
+        let lastAlertId = "";
 
         window.startSystem = () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
-            checkGlobalAlerts();
-            setInterval(checkGlobalAlerts, 120000); // Check every 2 mins
+            checkHernandoAlerts();
+            setInterval(checkHernandoAlerts, 120000); // Check Hernando County every 2 mins
         };
 
-        // --- GLOBAL ALERT ENGINE ---
-        async function checkGlobalAlerts() {
+        // --- HERNANDO COUNTY ALERT ENGINE ---
+        async function checkHernandoAlerts() {
             try {
-                // Fetching active alerts for Florida zone FLZ248 (as previously used)
-                const res = await fetch('https://api.weather.gov/alerts/active?zone=FLZ248');
+                // FLZ242 is the NWS Zone for Hernando County
+                const res = await fetch('https://api.weather.gov/alerts/active?zone=FLZ242');
                 const data = await res.json();
                 
-                // Filtering for Amber Alerts, Hurricanes, or Severe Events
-                const priorityAlert = data.features.find(f => {
-                    const event = f.properties.event.toUpperCase();
-                    return event.includes('AMBER') || event.includes('HURRICANE') || event.includes('TORNADO') || event.includes('SEVERE');
-                });
+                if (data.features && data.features.length > 0) {
+                    const priorityAlert = data.features.find(f => {
+                        const event = f.properties.event.toUpperCase();
+                        return event.includes('AMBER') || event.includes('HURRICANE') || event.includes('TORNADO') || event.includes('SEVERE');
+                    });
 
-                if (priorityAlert) {
-                    pendingAlertText = priorityAlert.properties.headline;
-                    document.getElementById('alert-text').innerText = priorityAlert.properties.event.toUpperCase();
-                    document.getElementById('auto-alert-bar').classList.add('active');
+                    if (priorityAlert && priorityAlert.id !== lastAlertId) {
+                        lastAlertId = priorityAlert.id;
+                        pendingAlertText = priorityAlert.properties.headline;
+                        document.getElementById('alert-text').innerText = priorityAlert.properties.event.toUpperCase();
+                        document.getElementById('auto-alert-bar').classList.add('active');
+                    }
                 }
-            } catch (err) { console.log("Alert check failed"); }
+            } catch (err) { console.log("Hernando Alert sync failed"); }
         }
 
         window.confirmBroadcast = () => {
