@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v17.2</title>
+    <title>Westlake Elite // v17.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -62,7 +62,7 @@
             <aside>
                 <div class="card">
                     <p class="label">System Hub</p>
-                    <button class="btn btn-main" onclick="window.open('https://open.spotify.com', '_blank')">♫ Spotify (New Tab)</button>
+                    <button class="btn btn-main" onclick="launchSpotify()">♫ Open Spotify App</button>
                     <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="window.location.href='https://alexa.amazon.com'">◯ Alexa Console</button>
                     <button class="btn" id="voice-btn" onclick="toggleVoice()">🎤 <span id="voice-txt">Voice Announce</span></button>
                     <button class="btn" style="background:#2c312d;" onclick="manualBroadcast()">✉ Type Announcement</button>
@@ -128,6 +128,19 @@
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
         };
 
+        // --- SPOTIFY APP LAUNCHER ---
+        window.launchSpotify = () => {
+            // Attempt to open the App Protocol
+            window.location.href = "spotify:search";
+            
+            // Fallback to web player in new tab if app doesn't open after 500ms
+            setTimeout(() => {
+                if (document.hasFocus()) {
+                    window.open("https://open.spotify.com", "_blank");
+                }
+            }, 500);
+        };
+
         // --- VOICE ENGINE ---
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.continuous = true; rec.interimResults = true;
@@ -174,7 +187,6 @@
             document.getElementById('siren-msg').innerText = msg;
             
             if (type === 'weather') {
-                // EAS Dual Tone
                 sirenLoop = setInterval(() => {
                     const o1 = audioCtx.createOscillator(); const o2 = audioCtx.createOscillator();
                     const g = audioCtx.createGain(); o1.connect(g); o2.connect(g); g.connect(audioCtx.destination);
