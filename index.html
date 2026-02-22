@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v16.9</title>
+    <title>Westlake Elite // v17.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -101,16 +101,16 @@
         .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; }
         .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; justify-content: center; font-size: 1.2vh; }
 
-        /* --- Components --- */
-        .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
-        
+        /* --- Voice Active Animation --- */
         .rec-active { 
             background: #ff4b4b !important; 
             color: #fff !important; 
             animation: pulse 1s infinite alternate;
         }
-        @keyframes pulse { from { opacity: 1; } to { opacity: 0.7; } }
+        @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
 
+        .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
+        
         #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; margin-bottom: 1vh; }
         .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; }
 
@@ -147,7 +147,7 @@
                     <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="goTo('alexa')">
                         <span style="font-size: 2vh;">◯</span> Alexa Console
                     </button>
-                    <button class="btn" id="voice-btn" onclick="runVoice()">
+                    <button class="btn" id="voice-btn" onclick="toggleVoice()">
                         <span id="voice-icon" style="font-size: 2vh;">🎤</span> <span id="voice-txt">Voice Announce</span>
                     </button>
                     <button class="btn btn-emer" onclick="openLayer('emer')">
@@ -208,6 +208,8 @@
 
         let audioCtx;
         let sirenLoop;
+        let isRecording = false;
+        let finalTranscript = "";
 
         window.startSystem = () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -220,54 +222,51 @@
             window.location.href = dest;
         };
 
-        // --- ENHANCED VOICE ENGINE ---
+        // --- CONTINUOUS VOICE ENGINE ---
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Recognition) {
-            alert("Speech Recognition not supported in this browser.");
-        }
-        
         const rec = new Recognition();
-        rec.continuous = false;
-        rec.interimResults = false;
+        rec.continuous = true;
+        rec.interimResults = true;
         rec.lang = 'en-US';
 
-        window.runVoice = () => {
+        window.toggleVoice = () => {
             const btn = document.getElementById('voice-btn');
             const txt = document.getElementById('voice-txt');
-            
-            // Visual feedback that we are starting
-            btn.classList.add('rec-active');
-            txt.innerText = "LISTENING...";
-            
-            try {
+
+            if (!isRecording) {
+                // START RECORDING
+                finalTranscript = "";
+                isRecording = true;
+                btn.classList.add('rec-active');
+                txt.innerText = "RECORDING... (Click to Finish)";
                 rec.start();
-            } catch (e) {
-                console.error("Mic already active or blocked", e);
+            } else {
+                // STOP AND BROADCAST
+                isRecording = false;
+                rec.stop();
                 btn.classList.remove('rec-active');
                 txt.innerText = "Voice Announce";
             }
         };
 
         rec.onresult = (e) => {
-            const transcript = e.results[0][0].transcript;
-            const utter = new SpeechSynthesisUtterance("Announcement. " + transcript);
-            utter.rate = 0.9;
-            window.speechSynthesis.speak(utter);
-        };
-
-        rec.onerror = (e) => {
-            console.error("Speech Error:", e.error);
-            if(e.error === 'not-allowed') {
-                alert("Microphone access denied. Please click the Lock icon in your browser URL bar and set Microphone to 'Allow'.");
+            let interim = "";
+            for (let i = e.resultIndex; i < e.results.length; ++i) {
+                if (e.results[i].isFinal) {
+                    finalTranscript += e.results[i][0].transcript;
+                }
             }
         };
 
         rec.onend = () => {
-            document.getElementById('voice-btn').classList.remove('rec-active');
-            document.getElementById('voice-txt').innerText = "Voice Announce";
+            if (finalTranscript.trim() !== "") {
+                const utter = new SpeechSynthesisUtterance("Attention. " + finalTranscript);
+                utter.rate = 0.9;
+                window.speechSynthesis.speak(utter);
+            }
         };
 
-        // --- REST OF SYSTEM ---
+        // --- CORE FUNCTIONS ---
         window.triggerSiren = (msg) => {
             closeLayer('emer');
             const ui = document.getElementById('siren-ui');
