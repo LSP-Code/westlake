@@ -3,261 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v17.5 Tactical</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Westlake Elite // v19.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg: #000000; --surface: #141614; --primary: #d2e7d6; 
-            --on-primary: #1e3623; --primary-container: #3d4b3f;
-            --error: #ffb4ab; --warning: #fce99a; --radius: 2.5vh;
+            --bg: #030303; --glass: rgba(255, 255, 255, 0.04); --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #d2e7d6; --accent: #88998b; --error: #ffb4ab; --radius: 3vh;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Roboto', sans-serif; background: var(--bg); color: #e2e3dd; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #e2e3dd; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Lock & Layout */
-        #lock-screen { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .unlock-pill { background: var(--primary); color: var(--on-primary); border: none; padding: 2.5vh 7vh; border-radius: 10vh; font-weight: 700; font-size: 2.2vh; cursor: pointer; }
-        .app-shell { display: flex; flex-direction: column; height: 100%; padding: 1.5vh 2.5vh 2.5vh 2.5vh; gap: 1.5vh; }
-        header { display: flex; justify-content: space-between; align-items: center; height: 10vh; position: relative; }
-        .h-time { font-size: 8vh; font-weight: 300; line-height: 1; }
-        
-        /* Hernando Alert Bar */
-        #auto-alert-bar { 
-            position: absolute; left: 50%; transform: translateX(-50%) translateY(-150%);
-            background: #600000; border: 1px solid var(--error); padding: 1vh 3vh; 
-            border-radius: 5vh; display: flex; align-items: center; gap: 2vh; 
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9000;
-        }
-        #auto-alert-bar.active { transform: translateX(-50%) translateY(0); }
+        /* HEADER */
+        header { display: flex; justify-content: space-between; align-items: flex-end; padding: 4vh 5vh; height: 15vh; }
+        .h-time { font-size: 9vh; font-weight: 200; line-height: 0.8; letter-spacing: -2px; }
+        .h-brand { text-align: right; }
+        .h-brand h1 { font-size: 2.5vh; font-weight: 400; letter-spacing: 4px; color: var(--primary); text-transform: uppercase; }
+        .h-brand p { font-size: 1.2vh; opacity: 0.4; letter-spacing: 2px; margin-top: 0.5vh; }
 
-        .main-content { display: flex; flex: 1; gap: 2vh; min-height: 0; }
-        aside { flex: 0 0 26vw; display: flex; flex-direction: column; gap: 1.5vh; }
-        main { flex: 1; display: flex; }
+        /* LAYOUT */
+        .container { display: flex; flex: 1; padding: 0 4vh 4vh 4vh; gap: 3vh; min-height: 0; }
+        aside { flex: 0 0 32vw; display: flex; flex-direction: column; gap: 3vh; }
+        main { flex: 1; display: flex; border-radius: var(--radius); overflow: hidden; background: #000; border: 1px solid var(--glass-border); }
 
-        /* Cards & UI */
-        .card { background: var(--surface); border-radius: var(--radius); padding: 2vh; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.03); min-height: 0; }
-        .label { font-size: 1.1vh; font-weight: 700; color: var(--primary); margin-bottom: 1vh; letter-spacing: 0.1vh; text-transform: uppercase; opacity: 0.7; }
-        .btn { background: var(--primary-container); color: var(--primary); border: none; padding: 1.8vh; border-radius: 1.8vh; font-size: 1.6vh; font-weight: 600; margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh; }
-        .btn-main { background: var(--primary); color: var(--on-primary); }
-        .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
-        .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; border: none; padding: 1.5vh; border-radius: 1.5vh; cursor: pointer; }
-        .rec-active { background: #ff4b4b !important; color: #fff !important; animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+        /* GLASS CARDS */
+        .card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 3vh; display: flex; flex-direction: column; min-height: 0; backdrop-filter: blur(10px); }
+        .label { font-size: 1.1vh; font-weight: 600; color: var(--accent); margin-bottom: 2vh; letter-spacing: 0.2vh; text-transform: uppercase; }
 
-        /* Registry */
-        #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; }
-        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; cursor: pointer; }
+        /* BUTTONS */
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vh; margin-bottom: 2vh; }
+        .btn { background: var(--glass); border: 1px solid var(--glass-border); color: #fff; padding: 1.8vh; border-radius: 1.5vh; font-size: 1.5vh; font-weight: 400; cursor: pointer; transition: 0.3s; text-align: center; }
+        .btn:hover { background: rgba(255,255,255,0.1); }
+        .btn-active { background: var(--primary) !important; color: #000 !important; font-weight: 600; }
 
-        /* Overlays & Sirens */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 5vw; }
-        .siren-active { display: none; position: fixed; inset: 0; z-index: 9999; background: #600000; flex-direction: column; align-items: center; justify-content: center; animation: flash 0.4s infinite alternate; }
-        @keyframes flash { from { background: #200000; } to { background: #900000; } }
-        .cal-box { width: 100%; height: 100%; border-radius: 2vh; overflow: hidden; background: #000; filter: invert(92%) hue-rotate(180deg) brightness(0.65); }
+        /* 7 EMERGENCY OPTIONS */
+        .emer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1vh; }
+        .btn-e { background: rgba(255,180,171,0.05); border: 1px solid rgba(255,180,171,0.2); color: var(--error); padding: 1.2vh 0.5vh; border-radius: 1vh; font-size: 1.1vh; font-weight: 500; cursor: pointer; text-transform: uppercase; }
+        .btn-e:hover { background: rgba(255,180,171,0.2); }
+
+        /* REGISTRY */
+        #reg-list { overflow-y: auto; flex: 1; scrollbar-width: none; mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
+        .reg-item { padding: 1.5vh 0; border-bottom: 1px solid var(--glass-border); }
+        .reg-item .meta { font-size: 1vh; color: var(--accent); margin-bottom: 0.5vh; text-transform: uppercase; }
+        .reg-item .body { font-size: 1.8vh; font-weight: 300; color: #fff; }
+
+        /* ALARM SYSTEM */
+        .siren-ui { display: none; position: fixed; inset: 0; z-index: 10000; background: #000; flex-direction: column; align-items: center; justify-content: center; }
+        .siren-ui h1 { font-size: 12vh; font-weight: 200; letter-spacing: -5px; margin-bottom: 4vh; }
+        .flash-red { animation: alert-red 0.5s infinite alternate; }
+        @keyframes alert-red { from { color: #fff; } to { color: var(--error); } }
+
+        iframe { width: 100%; height: 100%; border: none; filter: invert(92%) hue-rotate(180deg) contrast(1.1); }
     </style>
 </head>
 <body>
 
-    <div id="lock-screen">
-        <div style="font-size: 15vh; font-weight: 300; color: #fff;" id="lc">00:00</div>
-        <button class="unlock-pill" onclick="startSystem()">ENTER HUB</button>
-    </div>
+    <header>
+        <div class="h-time" id="ht">00:00</div>
+        <div class="h-brand">
+            <h1>Westlake Elite</h1>
+            <p>COMMAND INTERFACE v19.0</p>
+        </div>
+    </header>
 
-    <div class="app-shell">
-        <header>
-            <div class="h-time" id="ht">00:00</div>
-            
-            <div id="auto-alert-bar">
-                <span id="alert-text" style="color:var(--error); font-weight:bold; font-size:1.4vh;">EMERGENCY ALERT</span>
-                <button class="btn-white" style="padding: 0.5vh 2vh; font-size: 1.2vh;" onclick="confirmBroadcast()">ANNOUNCE</button>
-                <button class="btn" style="background:transparent; color:white; border:none;" onclick="dismissAlert()">✕</button>
+    <div class="container">
+        <aside>
+            <div class="card">
+                <p class="label">System Hub</p>
+                <div class="btn-grid">
+                    <button class="btn btn-active" onclick="window.location.href='spotify:search'">Spotify</button>
+                    <button class="btn" onclick="window.location.href='https://alexa.amazon.com'">Alexa</button>
+                </div>
+                <div class="btn-grid" style="margin-bottom: 2vh;">
+                    <button class="btn" onclick="toggleVoice()">Voice Announce</button>
+                    <button class="btn" onclick="manualBroadcast()">Type Alert</button>
+                </div>
+                
+                <p class="label">Tactical Triggers</p>
+                <div class="emer-grid">
+                    <button class="btn-e" onclick="triggerSiren('POLICE')">Police</button>
+                    <button class="btn-e" onclick="triggerSiren('FIRE')">Fire</button>
+                    <button class="btn-e" onclick="triggerSiren('MEDICAL')">Medical</button>
+                    <button class="btn-e" onclick="triggerSiren('INTRUDER')">Intruder</button>
+                    <button class="btn-e" style="color:#fce99a; border-color:rgba(252,233,154,0.2)" onclick="triggerSiren('WEATHER')">Weather</button>
+                    <button class="btn-e" onclick="triggerSiren('AMBER')">Amber</button>
+                    <button class="btn-e" onclick="triggerSiren('LOCKDOWN')">Lockdown</button>
+                    <button class="btn-e" style="background:#fff; color:#000;" onclick="stopSiren()">Clear</button>
+                </div>
             </div>
 
-            <div style="font-size: 3vh; color: var(--primary); opacity: 0.8;">WESTLAKE ELITE TACTICAL</div>
-        </header>
-
-        <div class="main-content">
-            <aside>
-                <div class="card">
-                    <p class="label">System Hub</p>
-                    <button class="btn btn-main" onclick="launchSpotify()">♫ Open Spotify App</button>
-                    <button class="btn btn-main" style="background: #232f3e; color: #00a8e1;" onclick="window.location.href='https://alexa.amazon.com'">◯ Alexa Console</button>
-                    <button class="btn" id="voice-btn" onclick="toggleVoice()">🎤 <span id="voice-txt">Voice Announce</span></button>
-                    <button class="btn" style="background:#2c312d;" onclick="manualBroadcast()">✉ Type Announcement</button>
-                    <button class="btn btn-emer" onclick="openLayer('emer')">⚠ Emergency Console</button>
+            <div class="card" style="padding: 2vh 3vh;">
+                <p class="label">Dishes Assignment</p>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span id="dish-name" style="font-size: 4vh; font-weight: 200;">---</span>
+                    <button class="btn" style="padding: 1vh 3vh; font-size: 1.2vh;" onclick="nextRotation()">Complete</button>
                 </div>
+            </div>
 
-                <div class="card">
-                    <p class="label">Dishes Cycle</p>
-                    <h2 id="dish-name" style="font-size: 4.5vh; font-weight: 300; color: var(--primary); margin-bottom: 1.5vh;">---</h2>
-                    <button class="btn btn-white" onclick="nextRotation()">Complete Cycle</button>
-                </div>
+            <div class="card" style="flex: 1; min-height: 0;">
+                <p class="label">Registry & History</p>
+                <div id="reg-list"></div>
+            </div>
+        </aside>
 
-                <div class="card" style="flex: 1;">
-                    <p class="label">Registry & Remote Comms</p>
-                    <div id="reg-list"></div>
-                    <div style="display: flex; gap: 1vh; margin-top: auto;">
-                        <button class="btn btn-white" style="flex: 2;" onclick="addEntry()">+ New</button>
-                        <button class="btn btn-white" style="flex: 1; background:#333; color:#fff;" onclick="clearRegistry()">Wipe</button>
-                    </div>
-                </div>
-            </aside>
-
-            <main class="card" style="padding: 0.5vh;">
-                <div class="cal-box">
-                    <iframe src="https://calendar.google.com/calendar/embed?src=family14661226943060601464%40group.calendar.google.com&ctz=America%2FNew_York&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff" width="100%" height="100%" frameborder="0"></iframe>
-                </div>
-            </main>
-        </div>
+        <main>
+            <iframe src="https://calendar.google.com/calendar/embed?src=family14661226943060601464%40group.calendar.google.com&ctz=America%2FNew_York&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff"></iframe>
+        </main>
     </div>
 
-    <div id="overlay-emer" class="overlay">
-        <div style="width: 80%; max-width: 600px; display: grid; grid-template-columns: 1fr 1fr; gap: 2vh;">
-            <h1 style="grid-column: span 2; color:var(--error); text-align:center; font-size: 4vh; margin-bottom: 2vh;">SELECT ALERT TYPE</h1>
-            <button class="btn btn-emer" onclick="triggerSiren('POLICE', 'police')">POLICE</button>
-            <button class="btn btn-emer" onclick="triggerSiren('FIRE', 'fire')">FIRE</button>
-            <button class="btn btn-emer" onclick="triggerSiren('INTRUDER', 'intruder')">INTRUDER</button>
-            <button class="btn btn-emer" style="background:#4a3900; color:#fce99a;" onclick="triggerSiren('WEATHER ALERT', 'weather')">WEATHER</button>
-            <button class="btn btn-white" style="grid-column: span 2; margin-top: 2vh;" onclick="closeLayer('emer')">CANCEL</button>
-        </div>
-    </div>
-
-    <div id="siren-ui" class="siren-active">
-        <h1 id="siren-msg" style="font-size: 8vh; font-weight: 900; color: #fff;"></h1>
-        <button class="unlock-pill" style="margin-top: 8vh; background: #fff; color: #000;" onclick="stopSiren()">ALL CLEAR</button>
+    <div id="siren-ui" class="siren-ui">
+        <h1 id="siren-msg" class="flash-red">EMERGENCY</h1>
+        <button class="btn" style="padding: 2vh 10vh; font-size: 2vh; border-radius: 5vh;" onclick="stopSiren()">System Secure</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4", authDomain: "my-a-ab8f3.firebaseapp.com",
-            projectId: "my-a-ab8f3", storageBucket: "my-a-ab8f3.firebasestorage.app",
-            messagingSenderId: "65984042323", appId: "1:65984042323:web:04a6ebadc4eb29d52c3da6"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDn3fqrdVcRnvkiX7t6TPJWrngXSrM_1p4", projectId: "my-a-ab8f3", appId: "1:65984042323:web:04a6ebadc4eb29d52c3da6" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let audioCtx, sirenLoop, isRecording = false, finalTranscript = "";
-        let pendingAlertText = "";
+        let audioCtx, sirenLoop;
 
-        window.startSystem = () => {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
-            checkHernandoAlerts();
-            setInterval(checkHernandoAlerts, 120000);
-        };
+        const unlockAudio = () => { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); };
+        document.body.addEventListener('mousedown', unlockAudio);
 
-        // --- NEW REMOTE LISTENER ---
-        // Listens for triggers from the separate phone remote
+        // SYNC WITH PHONE
         onSnapshot(doc(db, "system_triggers", "current_alert"), (snap) => {
-            if (snap.exists() && snap.data().active) {
-                const data = snap.data();
-                triggerSiren(data.type, data.type.toLowerCase());
-                updateDoc(doc(db, "system_triggers", "current_alert"), { active: false });
+            if (snap.exists()) {
+                const d = snap.data();
+                if(d.active) triggerSiren(d.type);
+                if(d.cancel) stopSiren();
             }
         });
 
-        // --- HERNANDO ALERTS ---
-        async function checkHernandoAlerts() {
-            try {
-                const res = await fetch('https://api.weather.gov/alerts/active?zone=FLZ242');
-                const data = await res.json();
-                const priority = data.features?.find(f => {
-                    const e = f.properties.event.toUpperCase();
-                    return e.includes('AMBER') || e.includes('HURRICANE') || e.includes('TORNADO') || e.includes('SEVERE');
-                });
-                if (priority) {
-                    pendingAlertText = priority.properties.headline;
-                    document.getElementById('alert-text').innerText = priority.properties.event.toUpperCase();
-                    document.getElementById('auto-alert-bar').classList.add('active');
-                }
-            } catch (err) {}
+        function broadcast(t) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(t);
+            u.rate = 0.9;
+            window.speechSynthesis.speak(u);
         }
 
-        window.confirmBroadcast = () => { if(pendingAlertText) { broadcast(pendingAlertText); dismissAlert(); } };
-        window.dismissAlert = () => { document.getElementById('auto-alert-bar').classList.remove('active'); };
-
-        // --- VOICE & BROADCAST ---
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        rec.continuous = true; rec.interimResults = true;
-        window.toggleVoice = () => {
-            if (!isRecording) {
-                finalTranscript = ""; isRecording = true;
-                document.getElementById('voice-btn').classList.add('rec-active');
-                document.getElementById('voice-txt').innerText = "LISTENING...";
-                rec.start();
-            } else {
-                isRecording = false; rec.stop();
-                document.getElementById('voice-btn').classList.remove('rec-active');
-                document.getElementById('voice-txt').innerText = "Voice Announce";
-            }
+        window.manualBroadcast = () => { 
+            const m = prompt("Enter Custom Alert:"); 
+            if(m) { broadcast(m); addEntry("MANUAL", m); }
         };
-        rec.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; ++i) if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript; };
-        rec.onend = () => { if (finalTranscript.trim()) broadcast(finalTranscript); };
 
-        window.manualBroadcast = () => { const msg = prompt("Enter announcement:"); if (msg) broadcast(msg); };
-
-        function broadcast(txt) {
-            const chime = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            chime.connect(g); g.connect(audioCtx.destination);
-            chime.frequency.setValueAtTime(440, audioCtx.currentTime);
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            chime.start(); chime.stop(audioCtx.currentTime + 0.5);
-            setTimeout(() => {
-                const utter = new SpeechSynthesisUtterance("Attention. " + txt);
-                window.speechSynthesis.speak(utter);
-            }, 600);
-        }
-
-        // --- SIREN ENGINE ---
-        window.triggerSiren = (msg, type) => {
-            closeLayer('emer');
+        window.triggerSiren = (msg) => {
+            unlockAudio();
             document.getElementById('siren-ui').style.display = 'flex';
             document.getElementById('siren-msg').innerText = msg;
+            if(sirenLoop) clearInterval(sirenLoop);
             sirenLoop = setInterval(() => {
                 const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
                 o.connect(g); g.connect(audioCtx.destination);
-                o.frequency.setValueAtTime(type === 'weather' ? 853 : 800, audioCtx.currentTime);
-                g.gain.value = 0.1; o.start(); o.stop(audioCtx.currentTime + 0.4);
-            }, 500);
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
+                o.frequency.setValueAtTime(800, audioCtx.currentTime);
+                o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+                g.gain.value = 0.05; o.start(); o.stop(audioCtx.currentTime + 0.3);
+            }, 400);
+            broadcast("Attention. " + msg + " alert has been initiated.");
         };
 
-        window.stopSiren = () => { clearInterval(sirenLoop); document.getElementById('siren-ui').style.display = 'none'; window.speechSynthesis.cancel(); };
-
-        // --- CORE FEATURES ---
-        function clock() {
-            const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            document.getElementById('lc').innerText = timeStr; document.getElementById('ht').innerText = timeStr;
-            setTimeout(clock, 1000);
-        }
-        clock();
-
-        onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
-            const list = document.getElementById('reg-list'); list.innerHTML = "";
-            s.forEach(d => {
-                const item = document.createElement('div'); item.className = 'reg-item';
-                item.innerHTML = `<b>${d.data().title}</b>: ${d.data().text}`;
-                item.onclick = async () => { if(confirm("Delete entry?")) await deleteDoc(doc(db, "houseInfo", d.id)); };
-                list.appendChild(item);
-            });
-            // If the latest message came from the iPhone Remote, announce it
-            const last = s.docs[0]?.data();
-            if(last && last.title === "REMOTE ALERT") broadcast(last.text);
-        });
-
-        window.addEntry = async () => {
-            const t = prompt("Title:"), n = prompt("Note:");
-            if(t && n) await addDoc(collection(db, "houseInfo"), { title: t.toUpperCase(), text: n, createdAt: serverTimestamp() });
-        };
-
-        window.clearRegistry = async () => {
-            if(confirm("Wipe all?")) {
-                const q = await getDocs(collection(db, "houseInfo"));
-                const batch = writeBatch(db); q.forEach(d => batch.delete(d.ref)); await batch.commit();
-            }
+        window.stopSiren = () => { 
+            clearInterval(sirenLoop); 
+            document.getElementById('siren-ui').style.display = 'none'; 
+            window.speechSynthesis.cancel(); 
         };
 
         const rota = ["BRIAN", "MALAKI", "LOGAN"];
@@ -267,9 +177,20 @@
             await updateDoc(doc(db, "settings", "dishes"), { index: (s.data().index + 1) % 3 });
         };
 
-        window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
-        window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
-        window.launchSpotify = () => { window.location.href = "spotify:search"; };
+        onSnapshot(query(collection(db, "houseInfo"), orderBy("createdAt", "desc")), (s) => {
+            const list = document.getElementById('reg-list'); list.innerHTML = "";
+            s.forEach(d => {
+                const item = document.createElement('div'); item.className = 'reg-item';
+                item.innerHTML = `<div class="meta">${d.data().title}</div><div class="body">${d.data().text}</div>`;
+                list.appendChild(item);
+            });
+        });
+
+        async function addEntry(title, text) {
+            await addDoc(collection(db, "houseInfo"), { title: title, text: text, createdAt: serverTimestamp() });
+        }
+
+        setInterval(() => { document.getElementById('ht').innerText = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }); }, 1000);
     </script>
 </body>
 </html>
