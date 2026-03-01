@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Westlake Elite // v17.4</title>
+    <title>Westlake Elite // v17.5 Tactical</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -20,11 +20,8 @@
         .app-shell { display: flex; flex-direction: column; height: 100%; padding: 1.5vh 2.5vh 2.5vh 2.5vh; gap: 1.5vh; }
         header { display: flex; justify-content: space-between; align-items: center; height: 10vh; position: relative; }
         .h-time { font-size: 8vh; font-weight: 300; line-height: 1; }
-        .main-content { display: flex; flex: 1; gap: 2vh; min-height: 0; }
-        aside { flex: 0 0 26vw; display: flex; flex-direction: column; gap: 1.5vh; }
-        main { flex: 1; display: flex; }
-
-        /* Auto-Alert UI */
+        
+        /* Hernando Alert Bar */
         #auto-alert-bar { 
             position: absolute; left: 50%; transform: translateX(-50%) translateY(-150%);
             background: #600000; border: 1px solid var(--error); padding: 1vh 3vh; 
@@ -33,13 +30,17 @@
         }
         #auto-alert-bar.active { transform: translateX(-50%) translateY(0); }
 
-        /* Cards & Buttons */
+        .main-content { display: flex; flex: 1; gap: 2vh; min-height: 0; }
+        aside { flex: 0 0 26vw; display: flex; flex-direction: column; gap: 1.5vh; }
+        main { flex: 1; display: flex; }
+
+        /* Cards & UI */
         .card { background: var(--surface); border-radius: var(--radius); padding: 2vh; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.03); min-height: 0; }
         .label { font-size: 1.1vh; font-weight: 700; color: var(--primary); margin-bottom: 1vh; letter-spacing: 0.1vh; text-transform: uppercase; opacity: 0.7; }
         .btn { background: var(--primary-container); color: var(--primary); border: none; padding: 1.8vh; border-radius: 1.8vh; font-size: 1.6vh; font-weight: 600; margin-bottom: 0.8vh; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 1.2vh; }
         .btn-main { background: var(--primary); color: var(--on-primary); }
         .btn-emer { background: #410002; color: var(--error); border: 1px solid rgba(255,180,171,0.1); }
-        .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; }
+        .btn-white { background: #ffffff; color: #000000; justify-content: center; font-weight: 700; border: none; padding: 1.5vh; border-radius: 1.5vh; cursor: pointer; }
         .rec-active { background: #ff4b4b !important; color: #fff !important; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
 
@@ -47,7 +48,7 @@
         #reg-list { overflow-y: auto; flex: 1; font-size: 2.2vh; scrollbar-width: none; }
         .reg-item { padding: 1.5vh 0; border-bottom: 1px solid #222; cursor: pointer; }
 
-        /* Overlays */
+        /* Overlays & Sirens */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 5vw; }
         .siren-active { display: none; position: fixed; inset: 0; z-index: 9999; background: #600000; flex-direction: column; align-items: center; justify-content: center; animation: flash 0.4s infinite alternate; }
         @keyframes flash { from { background: #200000; } to { background: #900000; } }
@@ -68,7 +69,7 @@
             <div id="auto-alert-bar">
                 <span id="alert-text" style="color:var(--error); font-weight:bold; font-size:1.4vh;">EMERGENCY ALERT</span>
                 <button class="btn-white" style="padding: 0.5vh 2vh; font-size: 1.2vh;" onclick="confirmBroadcast()">ANNOUNCE</button>
-                <button class="btn" style="background:transparent; color:white;" onclick="dismissAlert()">✕</button>
+                <button class="btn" style="background:transparent; color:white; border:none;" onclick="dismissAlert()">✕</button>
             </div>
 
             <div style="font-size: 3vh; color: var(--primary); opacity: 0.8;">WESTLAKE ELITE TACTICAL</div>
@@ -92,7 +93,7 @@
                 </div>
 
                 <div class="card" style="flex: 1;">
-                    <p class="label">Registry</p>
+                    <p class="label">Registry & Remote Comms</p>
                     <div id="reg-list"></div>
                     <div style="display: flex; gap: 1vh; margin-top: auto;">
                         <button class="btn btn-white" style="flex: 2;" onclick="addEntry()">+ New</button>
@@ -139,57 +140,45 @@
 
         let audioCtx, sirenLoop, isRecording = false, finalTranscript = "";
         let pendingAlertText = "";
-        let lastAlertId = "";
 
         window.startSystem = () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             document.getElementById('lock-screen').style.transform = 'translateY(-100%)';
             checkHernandoAlerts();
-            setInterval(checkHernandoAlerts, 120000); // Check Hernando County every 2 mins
+            setInterval(checkHernandoAlerts, 120000);
         };
 
-        // --- HERNANDO COUNTY ALERT ENGINE ---
+        // --- NEW REMOTE LISTENER ---
+        // Listens for triggers from the separate phone remote
+        onSnapshot(doc(db, "system_triggers", "current_alert"), (snap) => {
+            if (snap.exists() && snap.data().active) {
+                const data = snap.data();
+                triggerSiren(data.type, data.type.toLowerCase());
+                updateDoc(doc(db, "system_triggers", "current_alert"), { active: false });
+            }
+        });
+
+        // --- HERNANDO ALERTS ---
         async function checkHernandoAlerts() {
             try {
-                // FLZ242 is the NWS Zone for Hernando County
                 const res = await fetch('https://api.weather.gov/alerts/active?zone=FLZ242');
                 const data = await res.json();
-                
-                if (data.features && data.features.length > 0) {
-                    const priorityAlert = data.features.find(f => {
-                        const event = f.properties.event.toUpperCase();
-                        return event.includes('AMBER') || event.includes('HURRICANE') || event.includes('TORNADO') || event.includes('SEVERE');
-                    });
-
-                    if (priorityAlert && priorityAlert.id !== lastAlertId) {
-                        lastAlertId = priorityAlert.id;
-                        pendingAlertText = priorityAlert.properties.headline;
-                        document.getElementById('alert-text').innerText = priorityAlert.properties.event.toUpperCase();
-                        document.getElementById('auto-alert-bar').classList.add('active');
-                    }
+                const priority = data.features?.find(f => {
+                    const e = f.properties.event.toUpperCase();
+                    return e.includes('AMBER') || e.includes('HURRICANE') || e.includes('TORNADO') || e.includes('SEVERE');
+                });
+                if (priority) {
+                    pendingAlertText = priority.properties.headline;
+                    document.getElementById('alert-text').innerText = priority.properties.event.toUpperCase();
+                    document.getElementById('auto-alert-bar').classList.add('active');
                 }
-            } catch (err) { console.log("Hernando Alert sync failed"); }
+            } catch (err) {}
         }
 
-        window.confirmBroadcast = () => {
-            if (pendingAlertText) {
-                broadcast(pendingAlertText);
-                dismissAlert();
-            }
-        };
+        window.confirmBroadcast = () => { if(pendingAlertText) { broadcast(pendingAlertText); dismissAlert(); } };
+        window.dismissAlert = () => { document.getElementById('auto-alert-bar').classList.remove('active'); };
 
-        window.dismissAlert = () => {
-            document.getElementById('auto-alert-bar').classList.remove('active');
-            pendingAlertText = "";
-        };
-
-        // --- SPOTIFY ---
-        window.launchSpotify = () => {
-            window.location.href = "spotify:search";
-            setTimeout(() => { if (document.hasFocus()) window.open("https://open.spotify.com", "_blank"); }, 500);
-        };
-
-        // --- VOICE ENGINE ---
+        // --- VOICE & BROADCAST ---
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.continuous = true; rec.interimResults = true;
         window.toggleVoice = () => {
@@ -207,24 +196,18 @@
         rec.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; ++i) if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript; };
         rec.onend = () => { if (finalTranscript.trim()) broadcast(finalTranscript); };
 
-        window.manualBroadcast = () => {
-            const msg = prompt("Enter announcement text:");
-            if (msg) broadcast(msg);
-        };
+        window.manualBroadcast = () => { const msg = prompt("Enter announcement:"); if (msg) broadcast(msg); };
 
         function broadcast(txt) {
             const chime = audioCtx.createOscillator();
             const g = audioCtx.createGain();
             chime.connect(g); g.connect(audioCtx.destination);
             chime.frequency.setValueAtTime(440, audioCtx.currentTime);
-            chime.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
             g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
             chime.start(); chime.stop(audioCtx.currentTime + 0.5);
-            
             setTimeout(() => {
                 const utter = new SpeechSynthesisUtterance("Attention. " + txt);
-                utter.rate = 0.9; window.speechSynthesis.speak(utter);
+                window.speechSynthesis.speak(utter);
             }, 600);
         }
 
@@ -233,30 +216,18 @@
             closeLayer('emer');
             document.getElementById('siren-ui').style.display = 'flex';
             document.getElementById('siren-msg').innerText = msg;
-            
-            if (type === 'weather') {
-                sirenLoop = setInterval(() => {
-                    const o1 = audioCtx.createOscillator(); const o2 = audioCtx.createOscillator();
-                    const g = audioCtx.createGain(); o1.connect(g); o2.connect(g); g.connect(audioCtx.destination);
-                    o1.frequency.value = 853; o2.frequency.value = 960; g.gain.value = 0.1;
-                    o1.start(); o2.start(); o1.stop(audioCtx.currentTime + 0.8); o2.stop(audioCtx.currentTime + 0.8);
-                }, 1000);
-            } else {
-                sirenLoop = setInterval(() => {
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    o.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.4);
-                    g.gain.value = 0.1; o.start(); o.stop(audioCtx.currentTime + 0.4);
-                }, 500);
-            }
+            sirenLoop = setInterval(() => {
+                const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                o.connect(g); g.connect(audioCtx.destination);
+                o.frequency.setValueAtTime(type === 'weather' ? 853 : 800, audioCtx.currentTime);
+                g.gain.value = 0.1; o.start(); o.stop(audioCtx.currentTime + 0.4);
+            }, 500);
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
         };
 
         window.stopSiren = () => { clearInterval(sirenLoop); document.getElementById('siren-ui').style.display = 'none'; window.speechSynthesis.cancel(); };
-        window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
-        window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
 
+        // --- CORE FEATURES ---
         function clock() {
             const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
             document.getElementById('lc').innerText = timeStr; document.getElementById('ht').innerText = timeStr;
@@ -272,6 +243,9 @@
                 item.onclick = async () => { if(confirm("Delete entry?")) await deleteDoc(doc(db, "houseInfo", d.id)); };
                 list.appendChild(item);
             });
+            // If the latest message came from the iPhone Remote, announce it
+            const last = s.docs[0]?.data();
+            if(last && last.title === "REMOTE ALERT") broadcast(last.text);
         });
 
         window.addEntry = async () => {
@@ -292,6 +266,10 @@
             const s = await getDoc(doc(db, "settings", "dishes"));
             await updateDoc(doc(db, "settings", "dishes"), { index: (s.data().index + 1) % 3 });
         };
+
+        window.openLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'flex';
+        window.closeLayer = (id) => document.getElementById(`overlay-${id}`).style.display = 'none';
+        window.launchSpotify = () => { window.location.href = "spotify:search"; };
     </script>
 </body>
 </html>
