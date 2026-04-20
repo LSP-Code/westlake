@@ -139,7 +139,7 @@
         };
 
         // 4. Real-time Dish Sync
-        const rota = ["BRIAN", "MALAKI", "LOGAN"];
+        const rota = ["BRIAN", "LOGAN", "MALAKI"];
         onSnapshot(doc(db, "settings", "dishes"), (snap) => {
             if(snap.exists()) {
                 document.getElementById('dish-display').innerText = rota[snap.data().index];
