@@ -170,7 +170,7 @@
             window.speechSynthesis.cancel(); 
         };
 
-        const rota = ["BRIAN", "MALAKI", "LOGAN"];
+        const rota = ["BRIAN", "LOGAN", "MALAKI"];
         onSnapshot(doc(db, "settings", "dishes"), (s) => { if(s.exists()) document.getElementById('dish-name').innerText = rota[s.data().index]; });
         window.nextRotation = async () => {
             const s = await getDoc(doc(db, "settings", "dishes"));
