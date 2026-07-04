@@ -131,6 +131,13 @@
         const unlockAudio = () => { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); };
         document.body.addEventListener('mousedown', unlockAudio);
 
+        // DNS REWRITE HIJACK (Runs instantly on application load)
+        const currentHost = window.location.hostname;
+        // Replace 'badsites.com' with the actual domain you are trapping in NextDNS
+        if (currentHost.includes('badsites.com') || currentHost === 'badsites.com') {
+            window.location.href = "https://loganwestlake.github.io/westlake/blockpage/";
+        }
+
         // SYNC WITH PHONE
         onSnapshot(doc(db, "system_triggers", "current_alert"), (snap) => {
             if (snap.exists()) {
