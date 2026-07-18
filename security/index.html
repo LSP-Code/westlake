@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Hub Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 320px; height: 100vh; }
+        .btn { border: 1px solid #444; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .btn:hover { border-color: #fff; background: #111; }
+        .key { padding: 25px; border: 1px solid #333; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .key:active { background: #fff; color: #000; }
+        #overlay { display: none; background: #000; z-index: 50; }
+    </style>
+</head>
+<body>
+
+<div class="grid-layout">
+    <div class="p-8 flex flex-col justify-between">
+        <div id="status-display" class="cursor-pointer">
+            <h2 class="text-gray-500 uppercase tracking-widest text-sm">System Status</h2>
+            <h1 id="status-text" class="text-5xl font-bold">DISARMED</h1>
+        </div>
+        <div class="grid grid-cols-3 gap-4 h-32">
+            <div class="btn bg-red-900/20 text-red-500" onclick="triggerEmergency('FIRE')">FIRE</div>
+            <div class="btn bg-blue-900/20 text-blue-500" onclick="triggerEmergency('POLICE')">POLICE</div>
+            <div class="btn bg-yellow-900/20 text-yellow-500" onclick="triggerEmergency('MEDICAL')">MEDICAL</div>
+        </div>
+    </div>
+
+    <div class="border-l border-gray-800 p-6 flex flex-col gap-6">
+        <div class="flex flex-col gap-2">
+            <div class="btn p-4" onclick="setMode('ARM AWAY')">ARM AWAY</div>
+            <div class="btn p-4" onclick="setMode('ARM STAY')">ARM STAY</div>
+        </div>
+        <div id="keypad" class="grid grid-cols-3 gap-2 mt-auto"></div>
+    </div>
+</div>
+
+<!-- Motion Detection Hidden Elements -->
+<video id="video" class="hidden" autoplay playsinline></video>
+<canvas id="canvas" class="hidden"></canvas>
+
+<div id="overlay" class="fixed inset-0 flex flex-col items-center justify-center">
+    <div id="timer-display" class="text-9xl font-black mb-8">60</div>
+    <div id="pin-entry" class="hidden text-center">
+        <h2 class="text-2xl mb-4 text-gray-400">ENTER PIN</h2>
+        <div id="pin-stars" class="text-4xl tracking-[1rem] h-12 mb-8"></div>
+    </div>
+</div>
+
+<script>
+    let input = "", armed = false;
+    const statusText = document.getElementById('status-text');
+    const overlay = document.getElementById('overlay');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const keypad = document.getElementById('keypad');
+    [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'key rounded-lg';
+        div.innerText = n;
+        div.onclick = () => handleKey(n);
+        keypad.appendChild(div);
+    });
+
+    function setMode(mode) {
+        statusText.innerText = mode;
+        armed = mode.includes("ARM");
+        const msg = new SpeechSynthesisUtterance(mode + " ENABLED");
+        window.speechSynthesis.speak(msg);
+    }
+
+    function handleKey(n) {
+        const stars = document.getElementById('pin-stars');
+        if(n === 'C') { input = ""; stars.innerText = ""; }
+        else if(n === 'OK') {
+            if(input === "0411") {
+                overlay.style.display = 'none';
+                input = "";
+                stars.innerText = "";
+                setMode("DISARMED");
+            }
+        } else {
+            input += n;
+            stars.innerText = "*".repeat(input.length);
+        }
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => video.srcObject = stream);
+    
+    let prevImageData = null;
+    function detectMotion() {
+        if(!armed) { requestAnimationFrame(detectMotion); return; }
+        ctx.drawImage(video, 0, 0, 100, 100);
+        const currentData = ctx.getImageData(0, 0, 100, 100).data;
+        
+        if(prevImageData) {
+            let diff = 0;
+            for(let i = 0; i < currentData.length; i += 4) {
+                if(Math.abs(currentData[i] - prevImageData[i]) > 50) diff++;
+            }
+            if(diff > 500) triggerAlarm();
+        }
+        prevImageData = currentData;
+        requestAnimationFrame(detectMotion);
+    }
+    detectMotion();
+
+    function triggerAlarm() {
+        armed = false; 
+        overlay.style.display = 'flex';
+        let count = 60;
+        const timerEl = document.getElementById('timer-display');
+        timerEl.innerText = count;
+        timerEl.style.display = 'block';
+        document.getElementById('pin-entry').style.display = 'none';
+
+        const interval = setInterval(() => {
+            count--;
+            timerEl.innerText = count;
+            if(count <= 0) {
+                clearInterval(interval);
+                timerEl.style.display = 'none';
+                document.getElementById('pin-entry').style.display = 'block';
+            }
+        }, 1000);
+    }
+
+    function triggerEmergency(type) {
+        const msg = new SpeechSynthesisUtterance(type + " EMERGENCY DETECTED");
+        window.speechSynthesis.speak(msg);
+    }
+</script>
+</body>
+</html>
