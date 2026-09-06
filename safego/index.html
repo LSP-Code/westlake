@@ -4,6 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>SafeGo Westlake Elite</title>
+<meta name="theme-color" content="#0b1420" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="SafeGo Elite" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -505,7 +513,8 @@
     <p class="sub" style="margin-bottom:6px;">SafeGo runs as a web app, so alerts work like this:</p>
     <div style="font-size:13.5px; line-height:1.6; color:var(--steel-200);">
       <p><strong>While this tab is open</strong> — everyone in the circle gets an instant full-screen alert, siren, vibration, and spoken announcement, and can check in.</p>
-      <p><strong>What it can't do</strong> — it cannot ring through Silent Mode as an Apple Critical Alert, and it cannot draw over other apps on Android the way an installed app can. Those both require a native app built and approved for each platform. Keep this tab open and volume up during drills and real events.</p>
+      <p><strong>Custom alarm sound</strong> — while SafeGo is open (even in the background tab or as an installed home-screen app), the panic alert plays the real SafeGo alarm MP3, on loop, at full volume.</p>
+      <p><strong>What it can't do</strong> — no browser on iPhone, Android, or Chrome lets a website set a custom sound for its system notification banner; the phone always uses its own default ding for that banner. It also cannot ring through Silent Mode as an Apple Critical Alert, or draw over other apps the way an installed native app can. Those both require a native app built and approved for each platform. Keep this tab open (or the installed app running) and your volume up during drills and real events.</p>
     </div>
   </div>
 </div>
@@ -571,8 +580,37 @@ let activeAlert = null;   // current unresolved alert doc
 let isSignUpMode = false;
 let pendingIsDrill = null;
 let pendingType = null;
-let sirenCtx = null, sirenNodes = null, sirenTimer = null;
 let lastAnnouncedAlertId = null;
+let audioUnlocked = false;
+
+const ALARM_SOUND_URL = "https://ik.imagekit.io/WestlakeElite/SafeGo/MP3/SafeGo%20Emergency%20Alert%20Sound.mp3";
+const alarmAudio = new Audio(ALARM_SOUND_URL);
+alarmAudio.loop = true;
+alarmAudio.preload = "auto";
+
+// Browsers block audio playback until the user has interacted with the page at least
+// once. This "arms" the alarm the moment someone taps anything, so that if an alert
+// comes in later — even without them tapping again — the browser already trusts us
+// to play sound.
+function armAudioOnce(){
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  alarmAudio.volume = 0;
+  alarmAudio.play().then(()=>{
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+    alarmAudio.volume = 1;
+  }).catch(()=>{ audioUnlocked = false; });
+}
+['click','touchstart','keydown'].forEach(evt=>{
+  document.addEventListener(evt, armAudioOnce, { once:true, passive:true });
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* not hosted with a SW available */ });
+  });
+}
 
 const EMERGENCY_TYPES = [
   { id:'fire', label:'Fire', icon:'🔥' },
@@ -620,12 +658,34 @@ async function requestNotifPermission(){
   }
 }
 function fireSystemNotification(title, body){
-  if('Notification' in window && Notification.permission === 'granted'){
-    try{
-      const n = new Notification(title, { body, requireInteraction:true, tag:'safego-alert' });
+  const send = (reg) => {
+    const opts = { body, requireInteraction:true, tag:'safego-alert', renotify:true, vibrate:[400,150,400,150,400], icon:'icon-192.png', badge:'icon-192.png' };
+    if(reg && reg.showNotification){
+      reg.showNotification(title, opts);
+    }else if('Notification' in window && Notification.permission === 'granted'){
+      const n = new Notification(title, opts);
       n.onclick = ()=>{ window.focus(); n.close(); };
-    }catch(e){}
+    }
+  };
+  if('serviceWorker' in navigator && Notification.permission === 'granted'){
+    navigator.serviceWorker.getRegistration().then(reg=> send(reg)).catch(()=> send(null));
+  }else if('Notification' in window && Notification.permission === 'granted'){
+    send(null);
   }
+}
+function startSiren(){
+  armAudioOnce();
+  alarmAudio.currentTime = 0;
+  alarmAudio.volume = 1;
+  alarmAudio.play().catch(()=>{
+    // Autoplay was blocked because no interaction has happened yet on this page load.
+    // Show a one-tap banner so the person can unmute the alarm themselves.
+    toast('Tap anywhere to enable the alarm sound');
+  });
+}
+function stopSiren(){
+  alarmAudio.pause();
+  alarmAudio.currentTime = 0;
 }
 function speak(text){
   if('speechSynthesis' in window){
@@ -640,33 +700,7 @@ function speak(text){
 function vibrate(pattern){
   if('vibrate' in navigator){ try{ navigator.vibrate(pattern); }catch(e){} }
 }
-function startSiren(isDrill){
-  stopSiren();
-  try{
-    sirenCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = sirenCtx.createOscillator();
-    const gain = sirenCtx.createGain();
-    osc.type = 'sine';
-    gain.gain.value = 0.14;
-    osc.connect(gain); gain.connect(sirenCtx.destination);
-    osc.start();
-    sirenNodes = { osc, gain };
-    let up = true;
-    const low = isDrill ? 420 : 500, high = isDrill ? 620 : 950;
-    osc.frequency.setValueAtTime(low, sirenCtx.currentTime);
-    sirenTimer = setInterval(()=>{
-      if(!sirenNodes) return;
-      const target = up ? high : low;
-      sirenNodes.osc.frequency.linearRampToValueAtTime(target, sirenCtx.currentTime + 0.55);
-      up = !up;
-    }, 600);
-  }catch(e){ /* audio unavailable */ }
-}
-function stopSiren(){
-  if(sirenTimer){ clearInterval(sirenTimer); sirenTimer=null; }
-  if(sirenNodes){ try{ sirenNodes.osc.stop(); }catch(e){} sirenNodes=null; }
-  if(sirenCtx){ try{ sirenCtx.close(); }catch(e){} sirenCtx=null; }
-}
+
 
 /* ---------------- Auth screen wiring ---------------- */
 function setAuthMode(signUp){
@@ -1046,11 +1080,11 @@ function showAlertOverlay(alert){
 
   if(lastAnnouncedAlertId !== alert.id){
     lastAnnouncedAlertId = alert.id;
-    startSiren(alert.isDrill);
+    startSiren();
     vibrate(alert.isDrill ? [200,100,200] : [400,150,400,150,400]);
     fireSystemNotification(
-      (alert.isDrill?'DRILL: ':'EMERGENCY: ') + alert.label,
-      `${circleData?.name||'Your circle'} · ${alert.initiatedByName}`
+      (alert.isDrill?'DRILL: ':'CRITICAL: ') + alert.label,
+      `${circleData?.name||'Your circle'} · ${alert.initiatedByName} · tap to check in`
     );
     speak((alert.isDrill ? 'Drill alert. ' : 'Emergency alert. ') + alert.label + '. ' + (alert.description||'') + '. Please check in.');
   }
